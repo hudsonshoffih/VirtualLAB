@@ -1,101 +1,134 @@
-import Image from "next/image";
+import { MainLayout } from "@/components/layouts/main-layout"
+import { Button } from "@/components/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChevronRight, Code, Database, LineChart, Microscope } from "lucide-react"
+import Link from "next/link"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const featuredAlgorithms = [
+    {
+      title: "Exploratory Data Analysis",
+      description: "Learn how to analyze and visualize datasets to understand patterns and relationships.",
+      icon: Database,
+      href: "/algorithms/eda",
+    },
+    {
+      title: "Linear Regression",
+      description: "Master the fundamentals of linear regression for predictive modeling.",
+      icon: LineChart,
+      href: "/algorithms/linear-regression",
+    },
+    {
+      title: "Support Vector Machines",
+      description: "Understand the powerful classification algorithm and its applications.",
+      icon: Code,
+      href: "/algorithms/svm",
+    },
+  ]
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <MainLayout>
+      <div className="container px-4 py-6 md:py-12">
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="inline-block p-2 bg-primary/10 rounded-full mb-4">
+            <Microscope className="h-10 w-10 text-primary" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Data Science Lab</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl">
+            An interactive platform to learn, practice, and master data science algorithms through hands-on experience.
+          </p>
+          <div className="flex gap-4 mt-8">
+            <Button asChild size="lg">
+              <Link href="/algorithms/eda">Start Learning</Link>
+            </Button>
+            <Button variant="outline" size="lg">
+              <Link href="/about">Learn More</Link>
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          {featuredAlgorithms.map((algorithm) => (
+            <Card key={algorithm.title} className="transition-all hover:shadow-md">
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  <algorithm.icon className="h-5 w-5 text-primary" />
+                  <CardTitle>{algorithm.title}</CardTitle>
+                </div>
+                <CardDescription>{algorithm.description}</CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button variant="ghost" asChild className="w-full justify-between">
+                  <Link href={algorithm.href}>
+                    Explore <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-20 border rounded-lg p-8 bg-muted/50">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-3xl font-bold mb-4">How It Works</h2>
+              <p className="text-muted-foreground mb-6">
+                Our virtual lab provides a structured learning experience with four key components:
+              </p>
+              <ul className="space-y-4">
+                <li className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-background">
+                    <span className="text-sm font-medium">1</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Tutorial</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Learn the theoretical concepts and mathematical foundations.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-background">
+                    <span className="text-sm font-medium">2</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Demo</h3>
+                    <p className="text-sm text-muted-foreground">
+                      See the algorithm in action with interactive visualizations.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-background">
+                    <span className="text-sm font-medium">3</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Practice</h3>
+                    <p className="text-sm text-muted-foreground">Apply what you've learned with guided exercises.</p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-background">
+                    <span className="text-sm font-medium">4</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Test</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Validate your understanding with challenges and quizzes.
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-background rounded-lg p-6 border">
+              <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+                <p className="text-muted-foreground">Interactive Demo Preview</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MainLayout>
+  )
 }
+
