@@ -33,7 +33,7 @@ export default function Home() {
           <div className="inline-block p-2 bg-primary/10 rounded-full mb-4">
             <Microscope className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Data Science Lab</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Lab</h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
             An interactive platform to learn, practice, and master data science algorithms through hands-on experience.
           </p>
