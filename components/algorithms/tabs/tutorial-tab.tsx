@@ -1,8 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import type { Algorithm } from "@/lib/types"
 import { Card } from "@/components/ui/card"
-import { useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,9 @@ import {
   CheckCircle2,
   Copy,
   Check,
+  FileText,
+  BarChart,
+  PieChart,
 } from "lucide-react"
 
 interface TutorialTabProps {
@@ -25,28 +28,38 @@ interface TutorialTabProps {
 }
 
 export function TutorialTab({ algorithm }: TutorialTabProps) {
-  const [content, setContent] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentSection, setCurrentSection] = useState(0)
   const [copied, setCopied] = useState<string | null>(null)
 
+  // Determine if this is the EDA algorithm
+  const isEDA = algorithm.slug === "eda"
+
+  // Define sections based on algorithm
+  const sections = isEDA
+    ? [
+        { title: "Introduction to EDA", icon: <BookOpen className="h-4 w-4" /> },
+        { title: "Dataset Overview", icon: <Database className="h-4 w-4" /> },
+        { title: "Steps for EDA", icon: <ListChecks className="h-4 w-4" /> },
+        { title: "Visualizing Distributions", icon: <BarChart2 className="h-4 w-4" /> },
+        { title: "Correlation Analysis", icon: <Network className="h-4 w-4" /> },
+        { title: "Conclusion", icon: <CheckCircle2 className="h-4 w-4" /> },
+      ]
+    : [
+        { title: "Introduction", icon: <FileText className="h-4 w-4" /> },
+        { title: "Key Concepts", icon: <BookOpen className="h-4 w-4" /> },
+        { title: "Implementation", icon: <ListChecks className="h-4 w-4" /> },
+        { title: "Examples", icon: <BarChart className="h-4 w-4" /> },
+        { title: "Applications", icon: <PieChart className="h-4 w-4" /> },
+        { title: "Summary", icon: <CheckCircle2 className="h-4 w-4" /> },
+      ]
+
   // Simulating fetching tutorial content
   useEffect(() => {
     setTimeout(() => {
-      setContent(algorithm.tutorialContent || "# Tutorial content would be loaded here")
       setLoading(false)
     }, 1000)
-  }, [algorithm])
-
-  // Tutorial sections with icons
-  const sections = [
-    { title: "Introduction to EDA", icon: <BookOpen className="h-4 w-4" /> },
-    { title: "Dataset Overview", icon: <Database className="h-4 w-4" /> },
-    { title: "Steps for EDA", icon: <ListChecks className="h-4 w-4" /> },
-    { title: "Visualizing Distributions", icon: <BarChart2 className="h-4 w-4" /> },
-    { title: "Correlation Analysis", icon: <Network className="h-4 w-4" /> },
-    { title: "Conclusion", icon: <CheckCircle2 className="h-4 w-4" /> },
-  ]
+  }, [])
 
   // Function to copy code to clipboard
   const copyToClipboard = (text: string, id: string) => {
@@ -111,7 +124,7 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
               </div>
-            ) : (
+            ) : isEDA ? (
               <div>
                 <div className="flex items-center gap-3 mb-6">
                   {sections[currentSection].icon}
@@ -675,6 +688,48 @@ for species in df['species'].unique():
                       </div>
                     </>
                   )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  {sections[currentSection].icon}
+                  <h3 className="text-xl font-bold">{sections[currentSection].title}</h3>
+                </div>
+
+                <div className="prose dark:prose-invert max-w-none">
+                  <div className="bg-muted/50 p-4 rounded-lg mb-6 border-l-4 border-primary">
+                    <h4 className="mt-0 text-lg font-semibold">Tutorial Content Coming Soon</h4>
+                    <p className="mb-0">
+                      The tutorial content for {algorithm.title} is currently being developed. Check back later for a
+                      comprehensive guide.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <p>
+                      This tutorial will cover the key concepts, implementation details, and practical applications of{" "}
+                      {algorithm.title}.
+                    </p>
+
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <h5 className="font-medium mb-2">What You'll Learn:</h5>
+                      <ul className="space-y-1 list-disc pl-6 mb-0">
+                        <li>Core principles of {algorithm.title}</li>
+                        <li>Step-by-step implementation guide</li>
+                        <li>Practical examples with code</li>
+                        <li>Best practices and optimization techniques</li>
+                        <li>Real-world applications</li>
+                      </ul>
+                    </div>
+
+                    <p>In the meantime, you can explore the basic information about {algorithm.title} below:</p>
+
+                    <div className="bg-primary/10 p-6 rounded-lg border border-primary/20">
+                      <h4 className="text-lg font-semibold mb-4">About {algorithm.title}</h4>
+                      <p>{algorithm.description}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
