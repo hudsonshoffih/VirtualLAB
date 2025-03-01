@@ -44,7 +44,7 @@ export default function Home() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Lab</h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
-            An interactive platform to learn, practice, and master data science algorithms through hands-on experience.
+            An interactive platform to learn, practice, and master Machine learning algorithms through hands-on experience.
           </p>
           <div className="flex gap-4 mt-8">
             <Button asChild size="lg">
