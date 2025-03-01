@@ -1,30 +1,31 @@
 import { MainLayout } from "@/components/layouts/main-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronRight, Code, Database, LineChart, Microscope } from "lucide-react"
+import { ChevronRight, Database, LineChart, Microscope, BarChart, Network } from "lucide-react"
 import Link from "next/link"
+import { getAlgorithms } from "@/lib/algorithms"
 
 export default function Home() {
+  const allAlgorithms = getAlgorithms()
   const featuredAlgorithms = [
-    {
-      title: "Exploratory Data Analysis",
-      description: "Learn how to analyze and visualize datasets to understand patterns and relationships.",
-      icon: Database,
-      href: "/algorithms/eda",
-    },
-    {
-      title: "Linear Regression",
-      description: "Master the fundamentals of linear regression for predictive modeling.",
-      icon: LineChart,
-      href: "/algorithms/linear-regression",
-    },
-    {
-      title: "Support Vector Machines",
-      description: "Understand the powerful classification algorithm and its applications.",
-      icon: Code,
-      href: "/algorithms/svm",
-    },
+    allAlgorithms[0],
+    allAlgorithms[1],
+    allAlgorithms[2],
+    allAlgorithms[3],
+    allAlgorithms[4],
+    allAlgorithms[5],
+    allAlgorithms[6], // EDA
+    allAlgorithms[7], // Linear Regression
+    allAlgorithms[8],
+    allAlgorithms[9],
+    allAlgorithms[10], // SVM
   ]
+
+  const algorithmIcons: Record<string, any> = {
+    eda: Database,
+    "linear-regression": LineChart,
+    svm: Network,
+  }
 
   return (
     <MainLayout>
@@ -33,7 +34,7 @@ export default function Home() {
           <div className="inline-block p-2 bg-primary/10 rounded-full mb-4">
             <Microscope className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Data Science Lab</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Lab</h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
             An interactive platform to learn, practice, and master data science algorithms through hands-on experience.
           </p>
@@ -48,24 +49,28 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          {featuredAlgorithms.map((algorithm) => (
-            <Card key={algorithm.title} className="transition-all hover:shadow-md">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <algorithm.icon className="h-5 w-5 text-primary" />
-                  <CardTitle>{algorithm.title}</CardTitle>
-                </div>
-                <CardDescription>{algorithm.description}</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button variant="ghost" asChild className="w-full justify-between">
-                  <Link href={algorithm.href}>
-                    Explore <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+          {featuredAlgorithms.map((algorithm) => {
+            const Icon = algorithmIcons[algorithm.slug] || BarChart
+
+            return (
+              <Card key={algorithm.title} className="transition-all hover:shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className="h-5 w-5 text-primary" />
+                    <CardTitle>{algorithm.title}</CardTitle>
+                  </div>
+                  <CardDescription>{algorithm.description}</CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <Button variant="ghost" asChild className="w-full justify-between">
+                    <Link href={`/algorithms/${algorithm.slug}`}>
+                      Explore <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
         </div>
 
         <div className="mt-20 border rounded-lg p-8 bg-muted/50">

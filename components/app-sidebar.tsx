@@ -1,5 +1,7 @@
 "use client"
 import Link from "next/link"
+import React from "react"
+
 import { usePathname } from "next/navigation"
 import {
   Sidebar,
@@ -12,28 +14,43 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from "@/components/ui/sidebar"
-import { Microscope, Database, LineChart, Code, Home, BookOpen, Lightbulb, GraduationCap } from "lucide-react"
+import {
+  Microscope,
+  Database,
+  LineChart,
+  Code,
+  Home,
+  BookOpen,
+  Lightbulb,
+  GraduationCap,
+  BarChart,
+  PieChart,
+  GitBranch,
+  Network,
+  Layers,
+  CircleDot,
+  Boxes,
+} from "lucide-react"
+import { getAlgorithms } from "@/lib/algorithms"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const algorithms = getAlgorithms()
 
-  const algorithms = [
-    {
-      title: "Exploratory Data Analysis",
-      slug: "eda",
-      icon: Database,
-    },
-    {
-      title: "Linear Regression",
-      slug: "linear-regression",
-      icon: LineChart,
-    },
-    {
-      title: "Support Vector Machines",
-      slug: "svm",
-      icon: Code,
-    },
-  ]
+  // Map icons to algorithm slugs
+  const algorithmIcons: Record<string, any> = {
+    eda: Database,
+    "dataset-insights": BarChart,
+    "evaluation-metrics": PieChart,
+    "linear-regression": LineChart,
+    "logistic-regression": LineChart,
+    knn: Network,
+    "random-forest": GitBranch,
+    svm: Code,
+    "ensemble-models": Layers,
+    kmeans: CircleDot,
+    pca: Boxes,
+  }
 
   return (
     <Sidebar>
@@ -69,7 +86,11 @@ export function AppSidebar() {
                 <SidebarMenuItem key={algorithm.slug}>
                   <SidebarMenuButton asChild isActive={pathname === `/algorithms/${algorithm.slug}`}>
                     <Link href={`/algorithms/${algorithm.slug}`}>
-                      <algorithm.icon className="h-4 w-4" />
+                      {algorithmIcons[algorithm.slug] ? (
+                        React.createElement(algorithmIcons[algorithm.slug], { className: "h-4 w-4" })
+                      ) : (
+                        <Code className="h-4 w-4" />
+                      )}
                       <span>{algorithm.title}</span>
                     </Link>
                   </SidebarMenuButton>
