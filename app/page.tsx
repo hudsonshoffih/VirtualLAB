@@ -14,11 +14,11 @@ export default function Home() {
     allAlgorithms[3],
     allAlgorithms[4],
     allAlgorithms[5],
-    allAlgorithms[6], // EDA
-    allAlgorithms[7], // Linear Regression
+    allAlgorithms[6], 
+    allAlgorithms[7], 
     allAlgorithms[8],
     allAlgorithms[9],
-    allAlgorithms[10], // SVM
+    allAlgorithms[10], 
   ]
 
   const algorithmIcons: Record<string, any> = {
