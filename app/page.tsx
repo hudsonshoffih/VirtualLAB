@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layouts/main-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronRight, Database, LineChart, Microscope, BarChart, Network } from "lucide-react"
+import { ChevronRight, Database, LineChart, Microscope, BarChart, Network, PieChart, GitBranch, Layers, CircleDot, Boxes } from "lucide-react"
 import Link from "next/link"
 import { getAlgorithms } from "@/lib/algorithms"
 
@@ -23,8 +23,16 @@ export default function Home() {
 
   const algorithmIcons: Record<string, any> = {
     eda: Database,
+    "dataset-insights": BarChart,
+    "evaluation-metrics": PieChart,
     "linear-regression": LineChart,
+    "logistic-regression": LineChart,
+    knn: Network,
+    "random-forest": GitBranch,
     svm: Network,
+    "ensemble-models": Layers,
+    kmeans: CircleDot,
+    pca: Boxes,
   }
 
   return (
