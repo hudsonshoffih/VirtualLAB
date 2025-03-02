@@ -6,7 +6,3 @@ const config = {
 };
 
 export default config;
-// Path: postcss.config.mjs
-// import { defineConfig } from 'vite';
-// import tailwindcss from 'tailwindcss';
-// export default defineConfig({
