@@ -5,4 +5,3 @@ export interface Algorithm {
   description: string
   tutorialContent?: string
 }
-

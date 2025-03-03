@@ -12,6 +12,8 @@ import {
     TrendingUp,
     FileText,
     PieChart,
+    Ruler,
+    Sigma,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -27,12 +29,12 @@ import {
         ]
       case "dataset-insights":
         return [
-          { title: "Introduction to Statistics", icon: Calculator },
-          { title: "Descriptive Statistics", icon: BarChart },
-          { title: "Probability Distributions", icon: LineChart },
-          { title: "Hypothesis Testing", icon: ArrowDownUp },
-          { title: "Regression Analysis", icon: TrendingUp },
-          { title: "Applying Statistics", icon: CheckCircle2 },
+          { title: "Introduction to Statistics", icon: BookOpen },
+          { title: "Types of Data", icon: Database},
+          { title: "Central Tendency", icon: Sigma },
+          { title: "Measures of Dispersion", icon: Ruler },
+          { title: "Distributions & Skewness", icon: BarChart2 },
+          { title: "Statistical Inference", icon: LineChart}
         ]
       default:
         return [
