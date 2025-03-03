@@ -14,6 +14,9 @@ import {
     PieChart,
     Ruler,
     Sigma,
+    Lightbulb,
+    Target, 
+    Repeat,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -36,6 +39,15 @@ import {
           { title: "Distributions & Skewness", icon: BarChart2 },
           { title: "Statistical Inference", icon: LineChart}
         ]
+        case "evaluation-metrics":
+          return [
+            { title: "Introduction to Metrics", icon: BookOpen  },
+            { title: "Classification Metrics", icon: Target  },
+            { title: "Regression Metrics", icon: LineChart },
+            { title: "Cross-Validation", icon: Repeat },
+            { title: "Practical Applications", icon: Lightbulb},
+            { title: "Best Practices", icon: CheckCircle2 },
+          ]
       default:
         return [
           { title: "Introduction", icon: FileText },

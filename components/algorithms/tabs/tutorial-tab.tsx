@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { getTutorialSections } from "@/lib/tutorial-sections"
 import { EdaTutorial } from "./tutorial-content/eda-tutorial"
 import { DataInsightsTutorial } from "./tutorial-content/data-insights-tutorial"
+import { EvaluationMetricsTutorial } from "./tutorial-content/evaluation-metrics-tutorial"
 
 interface TutorialTabProps {
   algorithm: Algorithm
@@ -46,6 +47,8 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <EdaTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "dataset-insights":
         return <DataInsightsTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
+      case "evaluation-metrics":
+        return <EvaluationMetricsTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       default:
         return (
           <div className="prose dark:prose-invert max-w-none">
