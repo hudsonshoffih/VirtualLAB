@@ -7,7 +7,7 @@ export interface Dataset {
   }
   
   export const datasets: Dataset[] = [
-    // Linear Regression Datasets
+    // Linear Regression Dataset
     {
       id: "housing",
       name: "Housing Prices",
