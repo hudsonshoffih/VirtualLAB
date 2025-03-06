@@ -9,6 +9,7 @@ interface CodeEditorProps {
   language?: string
   height?: string
   minHeight?: string
+  onEditorDidMount?: (editor: any) => void
 }
 
 export function CodeEditor({
@@ -17,6 +18,7 @@ export function CodeEditor({
   language = "python",
   height = "300px",
   minHeight = "100px",
+  onEditorDidMount,
 }: CodeEditorProps) {
   const editorRef = useRef<any>(null)
 
@@ -34,6 +36,11 @@ export function CodeEditor({
       // Update height initially and when content changes
       updateHeight()
       editor.onDidContentSizeChange(updateHeight)
+    }
+
+    // Call the passed onEditorDidMount if provided
+    if (onEditorDidMount) {
+      onEditorDidMount(editor)
     }
   }
 
@@ -79,6 +86,13 @@ export function CodeEditor({
             horizontal: "auto",
           },
           wordWrap: "on",
+          suggest: {
+            showKeywords: true,
+            showSnippets: true,
+            showClasses: true,
+            showFunctions: true,
+          },
+          quickSuggestions: true,
         }}
         theme="vs-dark"
       />

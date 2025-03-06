@@ -3,7 +3,7 @@
 import type { Algorithm } from "@/lib/types"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   CheckCircle,
   ArrowRight,
@@ -17,6 +17,7 @@ import {
   Save,
   Download,
   FileCode,
+  Beaker,
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { NotebookCell } from "@/components/notebook-cell"
@@ -26,6 +27,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid"
+import { generateSessionId } from "@/lib/utils"
 
 interface PracticeTabProps {
   algorithm: Algorithm
@@ -46,6 +48,9 @@ export interface Cell {
   executionCount: number | null
 }
 
+// Number of steps to complete before showing dataset selector
+const STEPS_BEFORE_DATASET_SELECTOR = 2
+
 export function PracticeTab({ algorithm }: PracticeTabProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [cells, setCells] = useState<Cell[]>([])
@@ -53,8 +58,19 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
   const [isSolutionCorrect, setIsSolutionCorrect] = useState<boolean | null>(null)
   const [executionCounter, setExecutionCounter] = useState(1)
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null)
+  const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [showDatasetSelector, setShowDatasetSelector] = useState(false)
+  const [experimentMode, setExperimentMode] = useState(false)
 
   const steps = getPracticeSteps(algorithm.slug)
+  const sessionIdRef = useRef<string>(generateSessionId())
+
+  // Check if we should show the dataset selector
+  useEffect(() => {
+    if (completedSteps.length >= STEPS_BEFORE_DATASET_SELECTOR) {
+      setShowDatasetSelector(true)
+    }
+  }, [completedSteps])
 
   useEffect(() => {
     // Initialize with starter code when step changes
@@ -72,30 +88,56 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
       setIsSolutionCorrect(null)
       setExecutionCounter(1)
       setSelectedCellIndex(0)
+      setExperimentMode(false)
     }
   }, [currentStep, steps])
 
   const checkSolution = (results: any[]) => {
     if (!results || results.length === 0 || results.some((r) => r.error)) {
       setIsSolutionCorrect(false)
-      return
+      return false
     }
 
     // Check if any output contains expected elements
     const hasDataFrame = results.some((r) => (r.output && r.output.includes("DataFrame")) || r.table_html)
-
     const hasHead = results.some((r) => r.output && r.output.toLowerCase().includes("first 5 rows"))
-
     const hasPlot = results.some((r) => r.plot)
 
     // Adjust this logic based on the current step requirements
+    let isCorrect = false
     if (currentStep === 0) {
-      setIsSolutionCorrect(hasDataFrame && hasHead)
+      isCorrect = hasDataFrame && hasHead
     } else if (currentStep === 3) {
-      setIsSolutionCorrect(hasPlot)
+      isCorrect = hasPlot
     } else {
-      setIsSolutionCorrect(results.every((r) => r.success))
+      isCorrect = results.every((r) => r.success)
     }
+
+    setIsSolutionCorrect(isCorrect)
+
+    // If solution is correct and this step hasn't been completed yet, add it to completed steps
+    if (isCorrect && !completedSteps.includes(currentStep)) {
+      setCompletedSteps((prev) => [...prev, currentStep])
+    }
+
+    return isCorrect
+  }
+
+  const addCell = (index: number) => {
+    setCells((prev) => [
+      ...prev.slice(0, index + 1),
+      {
+        id: uuidv4(),
+        code: "",
+        result: null,
+        isExecuting: false,
+        executionCount: null,
+      },
+      ...prev.slice(index + 1),
+    ])
+
+    // Select the new cell
+    setSelectedCellIndex(index + 1)
   }
 
   const executeCell = async (cellIndex: number) => {
@@ -106,14 +148,26 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
     setCells((prev) => prev.map((c, i) => (i === cellIndex ? { ...c, isExecuting: true, result: null } : c)))
 
     try {
+      // Collect code from all previous cells to maintain context
+      const previousCellsCode = cells
+        .slice(0, cellIndex)
+        .map((c) => c.code)
+        .join("\n\n")
+
       const response = await fetch("/api/execute", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cells: [{ code: cell.code }],
+          cells: [
+            {
+              code: previousCellsCode ? `${previousCellsCode}\n\n${cell.code}` : cell.code,
+              preserveContext: true,
+            },
+          ],
           algorithm: algorithm.slug,
+          session_id: sessionIdRef.current,
         }),
       })
 
@@ -176,23 +230,6 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
     // Check solution after all cells have executed
     const results = cells.map((cell) => cell.result).filter(Boolean) as any[]
     checkSolution(results)
-  }
-
-  const addCell = (index: number) => {
-    setCells((prev) => [
-      ...prev.slice(0, index + 1),
-      {
-        id: uuidv4(),
-        code: "",
-        result: null,
-        isExecuting: false,
-        executionCount: null,
-      },
-      ...prev.slice(index + 1),
-    ])
-
-    // Select the new cell
-    setSelectedCellIndex(index + 1)
   }
 
   const deleteCell = (index: number) => {
@@ -311,7 +348,25 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
       setIsSolutionCorrect(null)
       setExecutionCounter(1)
       setSelectedCellIndex(0)
+      setExperimentMode(false)
     }
+  }
+
+  const enterExperimentMode = () => {
+    // Create a clean notebook for experimentation
+    setCells([
+      {
+        id: uuidv4(),
+        code: "",
+        result: null,
+        isExecuting: false,
+        executionCount: null,
+      },
+    ])
+    setIsSolutionCorrect(null)
+    setExecutionCounter(1)
+    setSelectedCellIndex(0)
+    setExperimentMode(true)
   }
 
   if (!steps || steps.length === 0) {
@@ -346,10 +401,17 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
                 <span>Try Again</span>
               </Badge>
             ))}
+
+          {experimentMode && (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Beaker className="h-3.5 w-3.5" />
+              <span>Experiment Mode</span>
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Progress:</span>
-          <Progress value={(currentStep / (steps.length - 1)) * 100} className="w-40" />
+          <Progress value={(completedSteps.length / steps.length) * 100} className="w-40" />
         </div>
       </div>
 
@@ -357,48 +419,86 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
         <div className="md:col-span-1">
           <Card className="p-4 h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">{steps[currentStep].title}</h3>
-              <Badge variant="outline">
-                Step {currentStep + 1}/{steps.length}
-              </Badge>
+              <h3 className="font-medium">{experimentMode ? "Experiment Mode" : steps[currentStep].title}</h3>
+              {!experimentMode && (
+                <Badge variant="outline">
+                  Step {currentStep + 1}/{steps.length}
+                </Badge>
+              )}
             </div>
 
-            <Tabs defaultValue="instructions" className="w-full">
+            <Tabs defaultValue={experimentMode ? "experiment" : "instructions"} className="w-full">
               <TabsList className="grid w-full grid-cols-1">
-                <TabsTrigger value="instructions">Instructions</TabsTrigger>
+                {experimentMode ? (
+                  <TabsTrigger value="experiment">Experiment</TabsTrigger>
+                ) : (
+                  <TabsTrigger value="instructions">Instructions</TabsTrigger>
+                )}
               </TabsList>
 
-              <TabsContent value="instructions" className="space-y-4 mt-4">
-                <div className="prose dark:prose-invert prose-sm max-w-none">
-                  <div dangerouslySetInnerHTML={{ __html: steps[currentStep].instruction }} />
-                </div>
+              {experimentMode ? (
+                <TabsContent value="experiment" className="space-y-4 mt-4">
+                  <div className="prose dark:prose-invert prose-sm max-w-none">
+                    <p>You're now in experiment mode! Feel free to try out different code and datasets.</p>
+                    <p>
+                      This is a sandbox environment where you can explore the algorithm without following specific
+                      steps.
+                    </p>
+                  </div>
 
-                <Separator />
+                  <Separator />
 
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Hints</h4>
-                  <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                    {steps[currentStep].hints.map((hint, index) => (
-                      <li key={index}>{hint}</li>
-                    ))}
-                  </ul>
-                </div>
+                  <div className="flex justify-between">
+                    <Button variant="outline" onClick={resetStep}>
+                      Return to Guided Practice
+                    </Button>
+                  </div>
+                </TabsContent>
+              ) : (
+                <TabsContent value="instructions" className="space-y-4 mt-4">
+                  <div className="prose dark:prose-invert prose-sm max-w-none">
+                    <div dangerouslySetInnerHTML={{ __html: steps[currentStep].instruction }} />
+                  </div>
 
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Resources</h4>
-                  <ul className="text-sm space-y-1">
-                    {steps[currentStep].resources.map((resource, index) => (
-                      <li key={index}>
-                        <Button variant="link" className="p-0 h-auto text-sm" asChild>
-                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                            {resource.title}
-                          </a>
+                  <Separator />
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Hints</h4>
+                    <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                      {steps[currentStep].hints.map((hint, index) => (
+                        <li key={index}>{hint}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Resources</h4>
+                    <ul className="text-sm space-y-1">
+                      {steps[currentStep].resources.map((resource, index) => (
+                        <li key={index}>
+                          <Button variant="link" className="p-0 h-auto text-sm" asChild>
+                            <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                              {resource.title}
+                            </a>
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {showDatasetSelector && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <Button variant="outline" onClick={enterExperimentMode}>
+                          <Beaker className="h-4 w-4 mr-2" />
+                          Experiment Mode
                         </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </TabsContent>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+              )}
             </Tabs>
           </Card>
         </div>
@@ -455,7 +555,13 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
                     isSelected={selectedCellIndex === index}
                     onSelect={() => setSelectedCellIndex(index)}
                     onChange={(code) => updateCellCode(index, code)}
-                    onExecute={() => executeCell(index)} />
+                    onExecute={() => executeCell(index)}
+                    algorithm={algorithm.slug}
+                    cellIndex={index}
+                    onRemove={cells.length > 1 ? () => deleteCell(index) : undefined}
+                    showDatasetSelector={showDatasetSelector || experimentMode}
+                    currentStep={currentStep}
+                  />
 
                   {selectedCellIndex === index && (
                     <div className="absolute -left-10 top-2 flex flex-col gap-1">
@@ -524,13 +630,23 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
             </div>
 
             <div className="p-4 border-t bg-muted flex items-center justify-between">
-              <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 0}>
-                Previous
-              </Button>
+              {!experimentMode ? (
+                <>
+                  <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 0}>
+                    Previous
+                  </Button>
 
-              <Button onClick={handleNext} disabled={currentStep === steps.length - 1}>
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+                  <Button onClick={handleNext} disabled={currentStep === steps.length - 1}>
+                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <div className="w-full flex justify-center">
+                  <Button variant="outline" onClick={resetStep}>
+                    Return to Guided Practice
+                  </Button>
+                </div>
+              )}
             </div>
           </Card>
         </div>
