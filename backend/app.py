@@ -1,126 +1,181 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
-import warnings
-from io import StringIO
+import os
+import traceback
+from io import StringIO, BytesIO
 import base64
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+import pickle
+import tempfile
+from contextlib import redirect_stdout
 
-# Import necessary libraries
+# Import commonly used ML libraries
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVC
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score, confusion_matrix, classification_report
-from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import load_iris, make_blobs, load_breast_cancer
+import scipy.stats as stats
+
+# Machine learning imports
+from sklearn import (
+    linear_model, ensemble, tree, neighbors, svm, 
+    neural_network, model_selection, metrics, preprocessing,
+    cluster, decomposition, feature_extraction, manifold
+)
+import xgboost
+import lightgbm
+import tensorflow as tf
+import torch
+import joblib
 
 app = Flask(__name__)
 CORS(app)
 
-# Store execution contexts for each session
-execution_contexts = {}
+# Session storage to maintain state between cells
+SESSIONS = {}
+MAX_MEMORY_MB = 500  # Memory limit per session (MB)
 
-def execute_python_code(code, algorithm=None, session_id=None, preserve_context=False):
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = StringIO()
+def get_session(session_id):
+    """Get or create a new session environment"""
+    if session_id not in SESSIONS:
+        SESSIONS[session_id] = {
+            'env': create_execution_environment(),
+            'history': [],
+            'temp_dir': tempfile.mkdtemp()
+        }
+    return SESSIONS[session_id]
+
+def create_execution_environment():
+    """Create a safe execution environment with ML libraries"""
+    return {
+        "__builtins__": __builtins__,
+        # Data manipulation
+        "np": np,
+        "pd": pd,
+        # Visualization
+        "plt": plt,
+        "sns": sns,
+        # Stats
+        "stats": stats,
+        # Scikit-learn
+        "linear_model": linear_model,
+        "ensemble": ensemble,
+        "tree": tree,
+        "neighbors": neighbors,
+        "svm": svm,
+        "neural_network": neural_network,
+        "model_selection": model_selection,
+        "metrics": metrics,
+        "preprocessing": preprocessing,
+        "cluster": cluster,
+        "decomposition": decomposition,
+        "feature_extraction": feature_extraction,
+        "manifold": manifold,
+        # Other ML frameworks
+        "xgboost": xgboost,
+        "lightgbm": lightgbm,
+        "tf": tf,
+        "torch": torch,
+        "joblib": joblib,
+        # Common functions
+        "train_test_split": model_selection.train_test_split
+    }
+
+def check_memory_usage(session_id):
+    """Check if session memory usage exceeds limits"""
+    session = SESSIONS.get(session_id)
+    if not session:
+        return False
+        
+    # Estimate memory usage (not perfect but gives some protection)
+    session_size = 0
+    for var_name, var in session['env'].items():
+        if var_name.startswith('__'):
+            continue
+        try:
+            if hasattr(var, 'nbytes'):
+                session_size += var.nbytes
+            elif isinstance(var, pd.DataFrame):
+                session_size += var.memory_usage(deep=True).sum()
+        except:
+            pass
+            
+    return session_size > (MAX_MEMORY_MB * 1024 * 1024)
+
+def execute_python_code(code, session_id):
+    """Execute Python code and maintain state between executions"""
+    session = get_session(session_id)
+    exec_globals = session['env']
     
-    # Suppress matplotlib warnings about non-GUI backend
-    warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+    # Configure matplotlib for non-interactive backend
+    plt.switch_backend('Agg')
+    plt.close('all')
     
-    plt.figure()  # Create a new figure
+    # Create output buffers
+    output_buffer = StringIO()
+    
+    # Variables to capture results
+    plot_data = None
+    df_html = None
+    error = None
     
     try:
-        # Define a safe execution environment with algorithm-specific imports
-        if preserve_context and session_id in execution_contexts:
-            # Use existing context
-            exec_globals = execution_contexts[session_id]
-        else:
-            # Create new context
-            exec_globals = {
-                "__builtins__": __builtins__, 
-                "np": np, 
-                "pd": pd,
-                "plt": plt,
-                "sns": sns,
-                "train_test_split": train_test_split,
-                "StandardScaler": StandardScaler,
-                "confusion_matrix": confusion_matrix,
-                "classification_report": classification_report,
-                "silhouette_score": silhouette_score,
-                "warnings": warnings,
-                "load_iris": load_iris,
-                "make_blobs": make_blobs,
-                "load_breast_cancer": load_breast_cancer
-            }
-            
-            # Add algorithm-specific libraries
-            if algorithm == 'linear-regression':
-                exec_globals["LinearRegression"] = LinearRegression
-            elif algorithm == 'svm':
-                exec_globals["SVC"] = SVC
-            elif algorithm == 'kmeans':
-                exec_globals["KMeans"] = KMeans
+        # Execute code with context
+        with redirect_stdout(output_buffer):
+            exec(code, exec_globals)
         
-        # Add this line to the beginning of the code to suppress warnings
-        modified_code = "warnings.filterwarnings('ignore', category=UserWarning, module='matplotlib')\n" + code
-        
-        exec(modified_code, exec_globals)
-        
-        # Store the execution context for future use if session_id is provided
-        if session_id:
-            execution_contexts[session_id] = exec_globals
-        
-        # Capture DataFrame output if one exists
-        df_html = None
+        # Capture DataFrame outputs
         for var_name, var in exec_globals.items():
-            if isinstance(var, pd.DataFrame) and var_name != 'pd':
-                df_html = var.to_html(classes="table table-striped table-hover")
-                break
+            if var_name.startswith('__') or var_name in session['env']:
+                continue
+                
+            if isinstance(var, pd.DataFrame):
+                # Take the first dataframe found or largest one
+                if df_html is None or (var.shape[0] * var.shape[1]) > 0:
+                    df_html = var.head(100).to_html(classes="table table-striped table-hover")
         
-        # Capture plot if one was created
-        plot_data = None
+        # Capture matplotlib plots
         if plt.get_fignums():
-            plt.tight_layout()
-            from io import BytesIO
-            buffer = BytesIO()
-            plt.savefig(buffer, format='png', dpi=100)
-            buffer.seek(0)
-            plot_data = base64.b64encode(buffer.read()).decode('utf-8')
-            plt.close()  # Close the figure to free memory
+            buf = BytesIO()
+            plt.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+            buf.seek(0)
+            plot_data = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close('all')
         
-        sys.stdout = old_stdout
+        # Check for memory limits
+        if check_memory_usage(session_id):
+            # If exceeded, we could implement cleanup strategies here
+            pass
+            
+        # Save execution history
+        session['history'].append(code)
         
-        return redirected_output.getvalue(), None, df_html, plot_data
-        
+        return output_buffer.getvalue(), error, df_html, plot_data
+    
     except Exception as e:
-        sys.stdout = old_stdout
-        plt.close()  # Close any open figures
-        return None, str(e), None, None
+        error = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+        plt.close('all')
+        return output_buffer.getvalue(), error, None, None
+    
+    finally:
+        output_buffer.close()
 
 @app.route('/api/execute', methods=['POST'])
 def execute_code():
+    """API endpoint to execute code"""
     data = request.json
     cells = data.get('cells', [])
-    algorithm = data.get('algorithm')
-    session_id = data.get('session_id', request.remote_addr)  # Use IP as default session ID
+    session_id = data.get('session_id', 'default')
     
     results = []
     for cell in cells:
-        preserve_context = cell.get('preserveContext', False)
-        output, error, df_html, plot_data = execute_python_code(
-            cell["code"], 
-            algorithm, 
-            session_id, 
-            preserve_context
-        )
+        cell_id = cell.get("id")
+        code = cell.get("code", "")
+        
+        output, error, df_html, plot_data = execute_python_code(code, session_id)
         
         results.append({
+            "cell_id": cell_id,
             "output": output,
             "error": error,
             "table_html": df_html,
@@ -129,6 +184,118 @@ def execute_code():
     
     return jsonify(results)
 
+@app.route('/api/reset_session', methods=['POST'])
+def reset_session():
+    """Reset a specific session or all sessions"""
+    data = request.json
+    session_id = data.get('session_id')
+    
+    if session_id:
+        if session_id in SESSIONS:
+            # Clean up temp files
+            try:
+                if os.path.exists(SESSIONS[session_id]['temp_dir']):
+                    for file in os.listdir(SESSIONS[session_id]['temp_dir']):
+                        os.remove(os.path.join(SESSIONS[session_id]['temp_dir'], file))
+                    os.rmdir(SESSIONS[session_id]['temp_dir'])
+            except:
+                pass
+            
+            # Delete session
+            del SESSIONS[session_id]
+            return jsonify({"status": "success", "message": f"Session {session_id} reset"})
+        return jsonify({"status": "error", "message": "Session not found"})
+    else:
+        # Reset all sessions
+        for sid in list(SESSIONS.keys()):
+            try:
+                if os.path.exists(SESSIONS[sid]['temp_dir']):
+                    for file in os.listdir(SESSIONS[sid]['temp_dir']):
+                        os.remove(os.path.join(SESSIONS[sid]['temp_dir'], file))
+                    os.rmdir(SESSIONS[sid]['temp_dir'])
+            except:
+                pass
+            
+        SESSIONS.clear()
+        return jsonify({"status": "success", "message": "All sessions reset"})
+
+@app.route('/api/get_variables', methods=['POST'])
+def get_variables():
+    """Get variable information for the current session"""
+    data = request.json
+    session_id = data.get('session_id', 'default')
+    
+    session = get_session(session_id)
+    variables = {}
+    
+    for var_name, var in session['env'].items():
+        # Skip built-in and library references
+        if var_name.startswith('__') or var_name in create_execution_environment():
+            continue
+            
+        var_info = {
+            "type": type(var).__name__
+        }
+        
+        # Add shape for arrays and dataframes
+        if hasattr(var, 'shape'):
+            var_info["shape"] = str(var.shape)
+        elif isinstance(var, list):
+            var_info["length"] = len(var)
+            
+        # Add more specific info based on type
+        if isinstance(var, pd.DataFrame):
+            var_info["columns"] = var.columns.tolist()
+            var_info["dtypes"] = {col: str(dtype) for col, dtype in var.dtypes.items()}
+        
+        variables[var_name] = var_info
+    
+    return jsonify({"variables": variables})
+
+@app.route('/api/export_notebook', methods=['POST'])
+def export_notebook():
+    """Export session history as Jupyter notebook format"""
+    data = request.json
+    session_id = data.get('session_id', 'default')
+    
+    session = get_session(session_id)
+    
+    # Create a simple Jupyter notebook structure
+    notebook = {
+        "cells": [
+            {
+                "cell_type": "code",
+                "execution_count": i + 1,
+                "metadata": {},
+                "source": code.split('\n'),
+                "outputs": []
+            }
+            for i, code in enumerate(session['history'])
+        ],
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3"
+            },
+            "language_info": {
+                "codemirror_mode": {
+                    "name": "ipython",
+                    "version": 3
+                },
+                "file_extension": ".py",
+                "mimetype": "text/x-python",
+                "name": "python",
+                "nbconvert_exporter": "python",
+                "pygments_lexer": "ipython3",
+                "version": "3.8.0"
+            }
+        },
+        "nbformat": 4,
+        "nbformat_minor": 4
+    }
+    
+    return jsonify(notebook)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-

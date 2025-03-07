@@ -25,3 +25,10 @@ interface CodeOutputProps {
     table_html?: string
   } | null
 }
+
+export interface QuizQuestion {
+  question: string
+  options: { id: string; text: string }[]
+  correctAnswer: string
+  explanation?: string
+}
