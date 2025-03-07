@@ -108,7 +108,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/resources/tutorials">
                     <BookOpen className="h-4 w-4" />
-                    <span>Tutorials</span>
+                    <span>Contributors</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -116,7 +116,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/resources/examples">
                     <Lightbulb className="h-4 w-4" />
-                    <span>Examples</span>
+                    <span>Feedback</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -124,7 +124,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/resources/courses">
                     <GraduationCap className="h-4 w-4" />
-                    <span>Courses</span>
+                    <span>References</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
