@@ -12,6 +12,7 @@ import { getTutorialSections } from "@/lib/tutorial-sections"
 import { EdaTutorial } from "./tutorial-content/eda-tutorial"
 import { DataInsightsTutorial } from "./tutorial-content/data-insights-tutorial"
 import { EvaluationMetricsTutorial } from "./tutorial-content/evaluation-metrics-tutorial"
+import { LinearRegressionTutorial } from "./tutorial-content/linear-regression-tutorial"
 
 interface TutorialTabProps {
   algorithm: Algorithm
@@ -49,6 +50,8 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <DataInsightsTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "evaluation-metrics":
         return <EvaluationMetricsTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
+      case "linear-regression":
+        return <LinearRegressionTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       default:
         return (
           <div className="prose dark:prose-invert max-w-none">
@@ -147,4 +150,3 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
     </div>
   )
 }
-

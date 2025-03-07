@@ -5,3 +5,10 @@ export interface Algorithm {
   description: string
   tutorialContent?: string
 }
+
+export interface QuizQuestion {
+  question: string
+  options: { id: string; text: string }[]
+  correctAnswer: string
+  explanation?: string
+}

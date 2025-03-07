@@ -17,6 +17,8 @@ import {
     Lightbulb,
     Target, 
     Repeat,
+    Layers,
+    SplitSquareVertical,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -48,7 +50,16 @@ import {
             { title: "Practical Applications", icon: Lightbulb},
             { title: "Best Practices", icon: CheckCircle2 },
           ]
-      default:
+        case "linear-regression":
+          return [
+              { title: "Introduction", icon: BookOpen  },
+              { title: "Simple Linear Regression", icon: LineChart  },
+              { title: "Multiple Linear Regression", icon: Layers },
+              { title: "Model Evaluation", icon: BarChart },
+              { title: "Regularization Techniques", icon:  SplitSquareVertical,},
+              { title: "Conclusion", icon: CheckCircle2 },
+            ]
+          default:
         return [
           { title: "Introduction", icon: FileText },
           { title: "Key Concepts", icon: BookOpen },

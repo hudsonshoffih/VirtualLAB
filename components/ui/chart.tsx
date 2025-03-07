@@ -29,7 +29,7 @@ export function Chart({ type, data }: ChartProps) {
       group: data.groups ? data.groups[i] : "default",
     }))
 
-    const groups = [...new Set(data.groups || ["default"])]
+    const groups = Array.from(new Set(data.groups || ["default"]))
     const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088fe"]
 
     return (
@@ -42,11 +42,11 @@ export function Chart({ type, data }: ChartProps) {
           <Legend />
           {groups.map((group, index) => (
             <Scatter
-              key={group}
-              name={group}
-              data={chartData.filter((d: any) => d.group === group)}
-              fill={colors[index % colors.length]}
-            />
+            key={group as string}
+            name={group as string}
+            data={chartData.filter((d: any) => d.group === group)}
+            fill={colors[index % colors.length]}
+          />
           ))}
         </ScatterChart>
       </ResponsiveContainer>
