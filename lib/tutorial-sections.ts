@@ -19,6 +19,8 @@ import {
     Repeat,
     Layers,
     SplitSquareVertical,
+    GitBranch,
+    Code,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -59,7 +61,20 @@ import {
               { title: "Regularization Techniques", icon:  SplitSquareVertical,},
               { title: "Conclusion", icon: CheckCircle2 },
             ]
+        case "logistic-regression":
+          return [
+            { title: "Introduction", icon: BookOpen  },
+            { title: "Sigmoid Function", icon: LineChart  },
+            { title: "Types & Assumptions", icon: GitBranch},
+            { title: "Implementation", icon:  Code },
+            { title: "Model Evaluation", icon: BarChart2  },
+            { title: "Conclusion", icon: CheckCircle2 },
+          ]
+        case "knn":
+        case "random-forest":
+        case "svm":
           default:
+          
         return [
           { title: "Introduction", icon: FileText },
           { title: "Key Concepts", icon: BookOpen },
