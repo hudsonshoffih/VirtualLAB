@@ -9,20 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { getQuizQuestions } from "@/lib/quiz-questions"
-import {
-  CheckCircle,
-  AlertCircle,
-  Timer,
-  Trophy,
-  Brain,
-  ArrowRight,
-  RotateCcw,
-  Award,
-  BookOpen,
-  Lightbulb,
-  Zap,
-} from "lucide-react"
+import { getQuizQuestions } from "@/lib/quiz/index"
+import { 
+  isQuizLevelCompleted, 
+  isQuizLevelUnlocked, 
+  saveQuizResult,
+  getQuizProgress
+} from "@/lib/quiz-progress"
+import { CheckCircle, AlertCircle, Timer, Trophy, Brain, ArrowRight, RotateCcw, Award, BookOpen, Lightbulb, Zap, Lock, Unlock, Calendar, Star } from 'lucide-react'
 
 interface TestTabProps {
   algorithm: Algorithm
@@ -83,6 +77,15 @@ export function TestTab({ algorithm }: TestTabProps) {
     setTestSubmitted(true)
     setTimerActive(false)
     setQuizCompleted(true)
+    
+    // Save the quiz result to track user progress
+    const scoreInfo = calculateScore()
+    saveQuizResult(
+      algorithm.slug,
+      difficultyLevel,
+      scoreInfo.score,
+      scoreInfo.total
+    )
   }
 
   const calculateScore = () => {
@@ -127,6 +130,37 @@ export function TestTab({ algorithm }: TestTabProps) {
 
   const score = calculateScore()
 
+  const getLevelIcon = (level: DifficultyLevel) => {
+    switch (level) {
+      case "beginner": return BookOpen
+      case "intermediate": return Lightbulb
+      case "advanced": return Zap
+    }
+  }
+
+  const getLevelColor = (level: DifficultyLevel) => {
+    switch (level) {
+      case "beginner": return "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900"
+      case "intermediate": return "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900"
+      case "advanced": return "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900"
+    }
+  }
+
+  const getProgressBadge = (level: DifficultyLevel) => {
+    const progress = getQuizProgress(algorithm.slug, level)
+    
+    if (!progress) return null
+    
+    return (
+      <div className="absolute top-2 right-2">
+        <Badge className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          {progress.score}/{progress.totalQuestions}
+        </Badge>
+      </div>
+    )
+  }
+
   // If no questions are available
   if (!questions || questions.length === 0) {
     return (
@@ -151,32 +185,68 @@ export function TestTab({ algorithm }: TestTabProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          {/* Beginner Level Card */}
           <Card
-            className="p-6 hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-primary/50"
-            onClick={() => startQuiz("beginner")}
+            className={`p-6 relative overflow-hidden transition-all ${
+              isQuizLevelUnlocked(algorithm.slug, "beginner") 
+                ? "hover:shadow-md cursor-pointer border-2 hover:border-primary/50" 
+                : "opacity-80 border-dashed"
+            }`}
+            onClick={() => {
+              if (isQuizLevelUnlocked(algorithm.slug, "beginner")) {
+                startQuiz("beginner")
+              }
+            }}
           >
+            {getProgressBadge("beginner")}
+            
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
-                <BookOpen className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <div className={`p-3 rounded-full ${getLevelColor("beginner")}`}>
+                <BookOpen className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold">Beginner</h3>
               <Badge variant="outline" className="px-3 py-1">
                 10 Minutes
               </Badge>
               <p className="text-muted-foreground">Fundamental concepts and basic applications of {algorithm.title}.</p>
-              <Button className="w-full mt-2">
-                Start Quiz <ArrowRight className="ml-2 h-4 w-4" />
+              
+              <Button className="w-full mt-2" disabled={!isQuizLevelUnlocked(algorithm.slug, "beginner")}>
+                {isQuizLevelUnlocked(algorithm.slug, "beginner") ? (
+                  <>Start Quiz <ArrowRight className="ml-2 h-4 w-4" /></>
+                ) : (
+                  <>Locked <Lock className="ml-2 h-4 w-4" /></>
+                )}
               </Button>
             </div>
           </Card>
 
+          {/* Intermediate Level Card */}
           <Card
-            className="p-6 hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-primary/50"
-            onClick={() => startQuiz("intermediate")}
+            className={`p-6 relative overflow-hidden transition-all ${
+              isQuizLevelUnlocked(algorithm.slug, "intermediate") 
+                ? "hover:shadow-md cursor-pointer border-2 hover:border-primary/50" 
+                : "opacity-80 border-dashed"
+            }`}
+            onClick={() => {
+              if (isQuizLevelUnlocked(algorithm.slug, "intermediate")) {
+                startQuiz("intermediate")
+              }
+            }}
           >
+            {getProgressBadge("intermediate")}
+            
+            {!isQuizLevelUnlocked(algorithm.slug, "intermediate") && (
+              <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px] flex items-center justify-center">
+                <div className="bg-background/90 rounded-lg p-3 shadow-lg">
+                  <Lock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-center font-medium">Complete Beginner Level<br/>to Unlock</p>
+                </div>
+              </div>
+            )}
+            
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                <Lightbulb className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <div className={`p-3 rounded-full ${getLevelColor("intermediate")}`}>
+                <Lightbulb className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold">Intermediate</h3>
               <Badge variant="outline" className="px-3 py-1">
@@ -185,31 +255,117 @@ export function TestTab({ algorithm }: TestTabProps) {
               <p className="text-muted-foreground">
                 Deeper understanding and practical implementation of {algorithm.title}.
               </p>
-              <Button className="w-full mt-2">
-                Start Quiz <ArrowRight className="ml-2 h-4 w-4" />
+              
+              <Button 
+                className="w-full mt-2" 
+                disabled={!isQuizLevelUnlocked(algorithm.slug, "intermediate")}
+              >
+                {isQuizLevelUnlocked(algorithm.slug, "intermediate") ? (
+                  <>Start Quiz <ArrowRight className="ml-2 h-4 w-4" /></>
+                ) : (
+                  <>Locked <Lock className="ml-2 h-4 w-4" /></>
+                )}
               </Button>
             </div>
           </Card>
 
+          {/* Advanced Level Card */}
           <Card
-            className="p-6 hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-primary/50"
-            onClick={() => startQuiz("advanced")}
+            className={`p-6 relative overflow-hidden transition-all ${
+              isQuizLevelUnlocked(algorithm.slug, "advanced") 
+                ? "hover:shadow-md cursor-pointer border-2 hover:border-primary/50" 
+                : "opacity-80 border-dashed"
+            }`}
+            onClick={() => {
+              if (isQuizLevelUnlocked(algorithm.slug, "advanced")) {
+                startQuiz("advanced")
+              }
+            }}
           >
+            {getProgressBadge("advanced")}
+            
+            {!isQuizLevelUnlocked(algorithm.slug, "advanced") && (
+              <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px] flex items-center justify-center">
+                <div className="bg-background/90 rounded-lg p-3 shadow-lg">
+                  <Lock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-center font-medium">Complete Intermediate Level<br/>to Unlock</p>
+                </div>
+              </div>
+            )}
+            
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
-                <Zap className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <div className={`p-3 rounded-full ${getLevelColor("advanced")}`}>
+                <Zap className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold">Advanced</h3>
               <Badge variant="outline" className="px-3 py-1">
                 20 Minutes
               </Badge>
               <p className="text-muted-foreground">Complex scenarios and advanced techniques for {algorithm.title}.</p>
-              <Button className="w-full mt-2">
-                Start Quiz <ArrowRight className="ml-2 h-4 w-4" />
+              
+              <Button 
+                className="w-full mt-2" 
+                disabled={!isQuizLevelUnlocked(algorithm.slug, "advanced")}
+              >
+                {isQuizLevelUnlocked(algorithm.slug, "advanced") ? (
+                  <>Start Quiz <ArrowRight className="ml-2 h-4 w-4" /></>
+                ) : (
+                  <>Locked <Lock className="ml-2 h-4 w-4" /></>
+                )}
               </Button>
             </div>
           </Card>
         </div>
+
+        {/* Summary of User Progress */}
+        <Card className="p-6 mt-6">
+          <h3 className="text-lg font-medium mb-4">Your Progress</h3>
+          <div className="space-y-4">
+            {["beginner", "intermediate", "advanced"].map((level) => {
+              const progress = getQuizProgress(algorithm.slug, level as DifficultyLevel)
+              const LevelIcon = getLevelIcon(level as DifficultyLevel)
+              
+              return (
+                <div key={level} className="flex items-center">
+                  <div className={`p-2 rounded-full mr-3 ${getLevelColor(level as DifficultyLevel)}`}>
+                    <LevelIcon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium capitalize">{level}</h4>
+                      {progress ? (
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Calendar className="h-3.5 w-3.5 mr-1" />
+                          {new Date(progress.date).toLocaleDateString()}
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          {isQuizLevelUnlocked(algorithm.slug, level) ? 'Not Attempted' : 'Locked'}
+                        </Badge>
+                      )}
+                    </div>
+                    {progress ? (
+                      <div className="mt-1">
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span>Score: {progress.score}/{progress.totalQuestions}</span>
+                          <span>{Math.round((progress.score / progress.totalQuestions) * 100)}%</span>
+                        </div>
+                        <Progress 
+                          value={(progress.score / progress.totalQuestions) * 100} 
+                          className="h-1.5" 
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-1">
+                        <Progress value={0} className="h-1.5" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
       </div>
     )
   }
@@ -316,6 +472,19 @@ export function TestTab({ algorithm }: TestTabProps) {
                 You scored {score.score} out of {score.total} ({score.percentage}%)
               </p>
 
+              <div className="flex items-center mt-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-6 w-6 ${
+                      star <= Math.ceil(score.percentage / 20)
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-muted-foreground"
+                    }`}
+                  />
+                ))}
+              </div>
+
               <div className="w-full max-w-xs mt-6">
                 <div className="h-4 bg-muted rounded-full overflow-hidden">
                   <div
@@ -403,7 +572,7 @@ export function TestTab({ algorithm }: TestTabProps) {
               <div className="space-x-2">
                 <Button variant="outline" onClick={resetQuiz}>
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  Try Different Level
+                  Return to Levels
                 </Button>
                 <Button
                   onClick={() => {
@@ -427,6 +596,8 @@ export function TestTab({ algorithm }: TestTabProps) {
                   <div className="flex items-start gap-2">
                     {selectedAnswers[index] === question.correctAnswer ? (
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                    ) : selectedAnswers[index] !== question.correctAnswer && selectedAnswers[index] !== undefined ? (
+                      <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
                     ) : (
                       <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
                     )}
@@ -467,4 +638,3 @@ export function TestTab({ algorithm }: TestTabProps) {
     </div>
   )
 }
-
