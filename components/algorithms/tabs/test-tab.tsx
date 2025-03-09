@@ -378,7 +378,7 @@ export function TestTab({ algorithm }: TestTabProps) {
           <Badge
             variant={
               difficultyLevel === "beginner"
-                ? "outline"
+                ? "secondary"
                 : difficultyLevel === "intermediate"
                   ? "default"
                   : "destructive"

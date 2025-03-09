@@ -21,6 +21,8 @@ import {
     SplitSquareVertical,
     GitBranch,
     Code,
+    Users,
+    Zap,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -71,6 +73,14 @@ import {
             { title: "Conclusion", icon: CheckCircle2 },
           ]
         case "knn":
+          return [
+            { title: "Introduction to KNN", icon: Users},
+            { title: "Understanding the Algorithm", icon: Network },
+            { title: "Distance Metrics", icon: Ruler },
+            { title: "Implementation with Scikit-Learn", icon: Code },
+            { title: "Finding the Best K Value", icon: BarChart },
+            { title: "Optimizing with KD-Tree", icon: Zap },
+          ]
         case "random-forest":
         case "svm":
           default:
