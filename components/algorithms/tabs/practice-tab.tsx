@@ -18,12 +18,12 @@ export function PracticeTab({ algorithm }: PracticeTabProps) {
   // Simulated practice steps
   const steps = [
     {
-      title: "Step 1: Data Preparation",
-      instruction: "Write code to load and preprocess the dataset for analysis.",
+      title: "Step 1: Load the Dataset",
+      instruction: "Import necessary libraries and load the dataset for analysis.",
     },
     {
-      title: "Step 2: Implement the Algorithm",
-      instruction: "Implement the core functionality of the algorithm.",
+      title: "Step 2: Understand the Data",
+      instruction: "Check the structure, data types, and general statistics of the dataset.",
     },
     {
       title: "Step 3: Evaluate Results",
