@@ -14,6 +14,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Cell,
+  TooltipProps,
 } from "recharts"
 
 interface ChartProps {
@@ -42,11 +44,11 @@ export function Chart({ type, data }: ChartProps) {
           <Legend />
           {groups.map((group, index) => (
             <Scatter
-            key={group as string}
-            name={group as string}
-            data={chartData.filter((d: any) => d.group === group)}
-            fill={colors[index % colors.length]}
-          />
+              key={group as string}
+              name={group as string}
+              data={chartData.filter((d: any) => d.group === group)}
+              fill={colors[index % colors.length]}
+            />
           ))}
         </ScatterChart>
       </ResponsiveContainer>
@@ -174,16 +176,158 @@ export function Chart({ type, data }: ChartProps) {
   return <div>Unsupported chart type</div>
 }
 
-// Export additional components to match the import in python-code-editor.tsx
-export const ChartContainer = ({ children }: { children: React.ReactNode }) => <div className="w-full">{children}</div>
+// Chart container component
+export const ChartContainer = ({ children }: { children: React.ReactNode }) => (
+  <div className="w-full h-[400px] my-4">{children}</div>
+)
 
-export const ChartTooltip = ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+// Chart title component
+export const ChartTitle = ({ children }: { children: React.ReactNode }) => (
+  <h3 className="text-lg font-medium mb-4 text-center">{children}</h3>
+)
 
-export const ChartTooltipContent = ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+// Chart tooltip components - Updated to support render props
+type TooltipRenderProps = {
+  point: {
+    data: any;
+    [key: string]: any;
+  };
+  [key: string]: any;
+};
 
-export const ChartLegend = ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+export const ChartTooltip = ({ children }: { children: ((props: TooltipRenderProps) => React.ReactNode) | React.ReactNode }) => {
+  // This is now a wrapper that can accept either direct children or a render prop function
+  return <>{children}</>
+}
 
-export const ChartLegendContent = ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+export const ChartTooltipContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="bg-background border rounded-md shadow-md p-2">{children}</div>
+)
 
+export const ChartTooltipItem = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="flex justify-between gap-2">
+    <span className="font-medium">{label}:</span>
+    <span>{value}</span>
+  </div>
+)
+
+// Chart legend components
+export const ChartLegend = ({ children }: { children: React.ReactNode }) => (
+  <div className="chart-legend mt-4 flex flex-wrap justify-center gap-4">{children}</div>
+)
+
+export const ChartLegendItem = ({ color, label }: { color: string; label: string }) => (
+  <div className="flex items-center gap-2">
+    <div className="w-3 h-3" style={{ backgroundColor: color }}></div>
+    <span>{label}</span>
+  </div>
+)
+
+// Bar chart components
+export const ChartBar = ({ 
+  data, 
+  children 
+}: { 
+  data: any[]; 
+  children: ((data: any) => React.ReactNode) | React.ReactNode 
+}) => {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="category" />
+        <YAxis />
+        <Tooltip content={(props) => {
+          if (typeof children === 'function') {
+            // If children is a function, we can use it to render tooltip content
+            const point = { data: props.payload?.[0]?.payload || {} };
+            return <div className="custom-tooltip bg-white p-2 border rounded shadow">
+              {children({ point })}
+            </div>;
+          }
+          return null;
+        }} />
+        <Legend />
+        {typeof children !== 'function' ? children : children(data)}
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+export const ChartBarItem = ({ 
+  data, 
+  valueAccessor, 
+  categoryAccessor, 
+  style 
+}: { 
+  data: any[]; 
+  valueAccessor: (d: any) => number; 
+  categoryAccessor: (d: any) => string;
+  style?: any;
+}) => {
+  return (
+    <Bar dataKey={(d) => valueAccessor(d)} name="Value">
+      {Array.isArray(data) && data.map((entry, index) => (
+        <Cell 
+          key={`cell-${index}`} 
+          fill={style?.fill ? (typeof style.fill === 'function' ? style.fill(entry) : style.fill) : '#8884d8'} 
+        />
+      ))}
+    </Bar>
+  )
+}
+
+// Line chart components
+export const ChartLine = ({ 
+  data, 
+  children 
+}: { 
+  data: any[]; 
+  children: ((data: any) => React.ReactNode) | React.ReactNode 
+}) => {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="category" />
+        <YAxis />
+        <Tooltip content={(props) => {
+          if (typeof children === 'function') {
+            // If children is a function, we can use it to render tooltip content
+            const point = { data: props.payload?.[0]?.payload || {} };
+            return <div className="custom-tooltip bg-white p-2 border rounded shadow">
+              {children({ point })}
+            </div>;
+          }
+          return null;
+        }} />
+        <Legend />
+        {typeof children !== 'function' ? children : children(data)}
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
+export const ChartLineItem = ({ 
+  data, 
+  valueAccessor, 
+  categoryAccessor, 
+  style 
+}: { 
+  data: any[]; 
+  valueAccessor: (d: any) => number; 
+  categoryAccessor: (d: any) => string;
+  style?: any;
+}) => {
+  return (
+    <Line 
+      type="monotone" 
+      dataKey={(d) => valueAccessor(d)} 
+      stroke={style?.stroke || '#8884d8'} 
+      strokeWidth={style?.strokeWidth || 2}
+    />
+  )
+}
+
+// Style component (placeholder)
 export const ChartStyle = () => null
-

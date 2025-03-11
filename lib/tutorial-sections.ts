@@ -23,6 +23,10 @@ import {
     Code,
     Users,
     Zap,
+    Trees,
+    TreeDeciduous,
+    Shuffle,
+    Sliders,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -82,7 +86,17 @@ import {
             { title: "Optimizing with KD-Tree", icon: Zap },
           ]
         case "random-forest":
+          return [
+            { title: "Introduction to Random Forest", icon: Trees  },
+            { title: "Understanding Decision Trees", icon: TreeDeciduous },
+            { title: "Bootstrapping & Bagging", icon: Shuffle  },
+            { title: "Feature Randomness", icon: GitBranch},
+            { title: "Implementation with Scikit-Learn", icon: Code},
+            { title: "Hyperparameter Tuning", icon: Sliders },
+            { title: "Visualization & Interpretation", icon: BarChart },
+          ]
         case "svm":
+
           default:
           
         return [

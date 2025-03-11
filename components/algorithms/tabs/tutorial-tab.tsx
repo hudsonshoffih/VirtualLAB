@@ -15,6 +15,7 @@ import { EvaluationMetricsTutorial } from "./tutorial-content/evaluation-metrics
 import { LinearRegressionTutorial } from "./tutorial-content/linear-regression-tutorial"
 import { LogisticRegressionTutorial } from "./tutorial-content/logistic-regression-tutorial"
 import { KnnTutorial } from "./tutorial-content/knn-tutorial"
+import { RandomForestTutorial } from "./tutorial-content/random-forest-tutorial"
 
 
 interface TutorialTabProps {
@@ -59,6 +60,8 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <LogisticRegressionTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "knn":
         return <KnnTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
+      case "random-forest":
+        return <RandomForestTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       default:
         return (
           <div className="prose dark:prose-invert max-w-none">
