@@ -27,6 +27,9 @@ import {
     TreeDeciduous,
     Shuffle,
     Sliders,
+    Workflow,
+    Settings,
+    GitMerge,
   } from "lucide-react"
   
   export const getTutorialSections = (algorithmSlug: string) => {
@@ -96,6 +99,15 @@ import {
             { title: "Visualization & Interpretation", icon: BarChart },
           ]
         case "svm":
+          return [
+            { title: "Introduction to SVM", icon: GitMerge},
+            { title: "Mathematical Foundations", icon: Sigma },
+            { title: "Linear SVM", icon: LineChart},
+            { title: "Kernel Trick", icon: Workflow },
+            { title: "Implementation with Scikit-Learn", icon: Code },
+            { title: "Hyperparameter Tuning", icon: Settings},
+            { title: "Visualization & Interpretation", icon: BarChart },
+          ]
 
           default:
           

@@ -17,11 +17,17 @@ import {
     ChartTitle,
   } from "@/components/ui/chart"
 
-interface SVMTutorialProps {
-  section?: number
-  onCopy?: (text: string, id: string) => void
-  copied?: string | null
-}
+  interface svmTutorialProps {
+    section: number
+    onCopy: (text: string, id: string) => void
+    copied: string | null
+  }
+  
+  export function SvmTutorial({ section, onCopy, copied }: svmTutorialProps) {
+    const [activeTab, setActiveTab] = useState("explanation")
+
+  // Render content based on current section
+  const [copiedState, setCopiedState] = useState<string | null>(null);
 
 const featureImportanceSVMCode = `// Add your feature importance SVM code here`;
 const randomSearchSVMCode = `# Example code for Randomized Search CV with SVM`;
@@ -49,44 +55,8 @@ grid_search = GridSearchCV(estimator=svc, param_grid=param_grid, cv=5, n_jobs=-1
 # Fit the grid search to the data
 grid_search.fit(X_train, y_train)
 `;
-
-export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVMTutorialProps) {
-  const [currentSection, setCurrentSection] = useState(section)
-  const [activeTab, setActiveTab] = useState("explanation")
-  const [copied, setCopied] = useState<string | null>(null)
-
-  // Define sections
-  const sections = [
-    { title: "Introduction to SVM", icon: <GitMerge className="h-4 w-4" /> },
-    { title: "Mathematical Foundations", icon: <Sigma className="h-4 w-4" /> },
-    { title: "Linear SVM", icon: <LineChart className="h-4 w-4" /> },
-    { title: "Kernel Trick", icon: <Workflow className="h-4 w-4" /> },
-    { title: "Implementation with Scikit-Learn", icon: <Code className="h-4 w-4" /> },
-    { title: "Hyperparameter Tuning", icon: <Settings className="h-4 w-4" /> },
-    { title: "Visualization & Interpretation", icon: <BarChart className="h-4 w-4" /> },
-  ]
-
-  // Function to copy code to clipboard
-  const copyToClipboard = (text: string, id: string) => {
-    if (onCopy) {
-      onCopy(text, id)
-    } else {
-      navigator.clipboard.writeText(text)
-      setCopied(id)
-      setTimeout(() => setCopied(null), 2000)
-    }
-  }
-
-  // Use either external copied state or internal
-  const copiedState = externalCopied !== undefined ? externalCopied : copied
-
-  // Calculate progress
-  const progress = ((currentSection + 1) / sections.length) * 100
-
-  // Render content based on current section
-  const renderContent = () => {
     // Section 0: Introduction to SVM
-    if (currentSection === 0) {
+    if (section === 0) {
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 p-6 rounded-lg border border-violet-100 dark:border-violet-900">
@@ -311,7 +281,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 1: Mathematical Foundations
-    if (currentSection === 1) {
+    if (section === 1) {
+      function copyToClipboard(svmMathCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 p-6 rounded-lg border border-violet-100 dark:border-violet-900">
@@ -584,7 +558,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 2: Linear SVM
-    if (currentSection === 2) {
+    if (section === 2) {
+      function copyToClipboard(linearSVMCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-6 rounded-lg border border-blue-100 dark:border-blue-900">
@@ -841,7 +819,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 3: Kernel Trick
-    if (currentSection === 3) {
+    if (section === 3) {
+      function copyToClipboard(kernelSVMCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950 dark:to-emerald-950 p-6 rounded-lg border border-teal-100 dark:border-teal-900">
@@ -1188,7 +1170,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 4: Implementation with Scikit-Learn
-    if (currentSection === 4) {
+    if (section === 4) {
+      function copyToClipboard(svmClassificationCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950 dark:to-teal-950 p-6 rounded-lg border border-green-100 dark:border-green-900">
@@ -1625,7 +1611,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 5: Hyperparameter Tuning
-    if (currentSection === 5) {
+    if (section === 5) {
+      function copyToClipboard(gridSearchSVMCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 p-6 rounded-lg border border-amber-100 dark:border-amber-900">
@@ -1993,7 +1983,11 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
     }
 
     // Section 6: Visualization & Interpretation
-    if (currentSection === 6) {
+    if (section === 6) {
+      function copyToClipboard(decisionBoundaryCode: string, arg1: string): void {
+        throw new Error("Function not implemented.")
+      }
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950 dark:to-blue-950 p-6 rounded-lg border border-indigo-100 dark:border-indigo-900">
@@ -2439,49 +2433,6 @@ export function SVMTutorial({ section = 0, onCopy, copied: externalCopied }: SVM
       </div>
     )
   }
-
-  return (
-    <div className="space-y-6">
-      {/* Header with progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Support Vector Machine Tutorial</h2>
-          <Badge variant="outline" className="px-3 py-1">
-            {currentSection + 1} of {sections.length}
-          </Badge>
-        </div>
-        <Progress value={progress} className="h-2" />
-      </div>
-
-      {/* Content */}
-      {renderContent()}
-
-      {/* Navigation buttons */}
-      <div className="flex justify-between mt-6">
-        <Button
-          variant="outline"
-          size="lg"
-          disabled={currentSection === 0}
-          onClick={() => setCurrentSection((prev) => Math.max(0, prev - 1))}
-          className="w-[120px]"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-        </Button>
-
-        <Button
-          variant={currentSection === sections.length - 1 ? "default" : "outline"}
-          size="lg"
-          disabled={currentSection === sections.length - 1}
-          onClick={() => setCurrentSection((prev) => Math.min(sections.length - 1, prev + 1))}
-          className="w-[120px]"
-        >
-          {currentSection === sections.length - 1 ? "Complete" : "Next"}
-          {currentSection !== sections.length - 1 && <ChevronRight className="h-4 w-4 ml-2" />}
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 // Code examples as constants
 const svmMathCode = `import numpy as np
