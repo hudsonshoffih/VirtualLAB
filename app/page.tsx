@@ -1,12 +1,31 @@
-import { MainLayout } from "@/components/layouts/main-layout"
-import { Button } from "@/components/ui/button"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronRight, Database, LineChart, Microscope, BarChart, Network, PieChart, GitBranch, Layers, CircleDot, Boxes } from "lucide-react"
-import Link from "next/link"
-import { getAlgorithms } from "@/lib/algorithms"
+import { MainLayout } from "@/components/layouts/main-layout";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChevronRight,
+  Database,
+  LineChart,
+  Microscope,
+  BarChart,
+  Network,
+  PieChart,
+  GitBranch,
+  Layers,
+  CircleDot,
+  Boxes,
+  LucideIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { getAlgorithms } from "@/lib/algorithms";
 
 export default function Home() {
-  const allAlgorithms = getAlgorithms()
+  const allAlgorithms = getAlgorithms();
   const featuredAlgorithms = [
     allAlgorithms[0],
     allAlgorithms[1],
@@ -14,14 +33,14 @@ export default function Home() {
     allAlgorithms[3],
     allAlgorithms[4],
     allAlgorithms[5],
-    allAlgorithms[6], 
-    allAlgorithms[7], 
+    allAlgorithms[6],
+    allAlgorithms[7],
     allAlgorithms[8],
     allAlgorithms[9],
-    allAlgorithms[10], 
-  ]
+    allAlgorithms[10],
+  ];
 
-  const algorithmIcons: Record<string, any> = {
+  const algorithmIcons: Record<string, LucideIcon> = {
     eda: Database,
     "dataset-insights": BarChart,
     "evaluation-metrics": PieChart,
@@ -33,7 +52,7 @@ export default function Home() {
     "ensemble-models": Layers,
     kmeans: CircleDot,
     pca: Boxes,
-  }
+  };
 
   return (
     <MainLayout>
@@ -42,9 +61,12 @@ export default function Home() {
           <div className="inline-block p-2 bg-primary/10 rounded-full mb-4">
             <Microscope className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Virtual Lab</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Virtual Lab
+          </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
-            An interactive platform to learn, practice, and master Machine learning algorithms through hands-on experience.
+            An interactive platform to learn, practice, and master Machine
+            learning algorithms through hands-on experience.
           </p>
           <div className="flex gap-4 mt-8">
             <Button asChild size="lg">
@@ -58,10 +80,13 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
           {featuredAlgorithms.map((algorithm) => {
-            const Icon = algorithmIcons[algorithm.slug] || BarChart
+            const Icon = algorithmIcons[algorithm.slug] || BarChart;
 
             return (
-              <Card key={algorithm.title} className="transition-all hover:shadow-md">
+              <Card
+                key={algorithm.title}
+                className="transition-all hover:shadow-md"
+              >
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className="h-5 w-5 text-primary" />
@@ -70,14 +95,18 @@ export default function Home() {
                   <CardDescription>{algorithm.description}</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button variant="ghost" asChild className="w-full justify-between">
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full justify-between"
+                  >
                     <Link href={`/algorithms/${algorithm.slug}`}>
                       Explore <ChevronRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </CardFooter>
               </Card>
-            )
+            );
           })}
         </div>
 
@@ -86,7 +115,8 @@ export default function Home() {
             <div>
               <h2 className="text-3xl font-bold mb-4">How It Works</h2>
               <p className="text-muted-foreground mb-6">
-                Our virtual lab provides a structured learning experience with four key components:
+                Our virtual lab provides a structured learning experience with
+                four key components:
               </p>
               <ul className="space-y-4">
                 <li className="flex gap-3">
@@ -96,7 +126,8 @@ export default function Home() {
                   <div>
                     <h3 className="font-medium">Tutorial</h3>
                     <p className="text-sm text-muted-foreground">
-                      Learn the theoretical concepts and mathematical foundations.
+                      Learn the theoretical concepts and mathematical
+                      foundations.
                     </p>
                   </div>
                 </li>
@@ -107,7 +138,8 @@ export default function Home() {
                   <div>
                     <h3 className="font-medium">Demo</h3>
                     <p className="text-sm text-muted-foreground">
-                      See the algorithm in action with interactive visualizations.
+                      See the algorithm in action with interactive
+                      visualizations.
                     </p>
                   </div>
                 </li>
@@ -117,7 +149,9 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-medium">Practice</h3>
-                    <p className="text-sm text-muted-foreground">Apply what you've learned with guided exercises.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Apply what you&apos;ve learned with guided exercises.
+                    </p>
                   </div>
                 </li>
                 <li className="flex gap-3">
@@ -135,13 +169,14 @@ export default function Home() {
             </div>
             <div className="bg-background rounded-lg p-6 border">
               <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-                <p className="text-muted-foreground">Interactive Demo Preview</p>
+                <p className="text-muted-foreground">
+                  Interactive Demo Preview
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </MainLayout>
-  )
+  );
 }
-
