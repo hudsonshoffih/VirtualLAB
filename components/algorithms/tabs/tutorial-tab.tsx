@@ -17,6 +17,7 @@ import { LogisticRegressionTutorial } from "./tutorial-content/logistic-regressi
 import { KnnTutorial } from "./tutorial-content/knn-tutorial"
 import { RandomForestTutorial } from "./tutorial-content/random-forest-tutorial"
 import { SvmTutorial } from "./tutorial-content/svm-tutorial"
+import { EnsembleTutorial } from "./tutorial-content/ensemble-learning-tutorial"
 
 
 interface TutorialTabProps {
@@ -65,6 +66,8 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <RandomForestTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "svm":
         return <SvmTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
+      case "ensemble-models":
+        return <EnsembleTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       default:
         return (
           <div className="prose dark:prose-invert max-w-none">

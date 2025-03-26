@@ -105,6 +105,14 @@ export const getTutorialSections = (algorithmSlug: string) => {
         { title: "Hyperparameter Tuning", icon: Settings },
         { title: "Visualization & Interpretation", icon: BarChart },
       ];
+    case "ensemble-models":
+      return [
+        { title: "Introduction to Ensemble Learning", icon: Layers },
+        { title: "Bagging (Bootstrap Aggregating)", icon: GitBranch },
+        { title: "Boosting", icon: Zap },
+        { title: "Stacking", icon: GitMerge },
+        { title: "Comparison & Best Practices", icon: CheckCircle2 },
+      ];
 
     default:
       return [
