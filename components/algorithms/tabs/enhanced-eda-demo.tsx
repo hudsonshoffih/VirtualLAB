@@ -1,1471 +1,890 @@
 "use client"
 
-import React from "react"
-
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Play, Pause, RefreshCw, BarChart3, LineChart, ScatterChartIcon } from "lucide-react"
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
   Legend,
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-} from "recharts"
-import { Download, RefreshCw, Info, AlertCircle, CheckCircle, Filter, Zap, Database } from "lucide-react"
-import { ChartContainer } from "@/components/ui/chart"
+  Filler,
+} from "chart.js"
+import { Chart, Scatter } from "react-chartjs-2"
+
+// Register ChartJS components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler)
 
 // Sample datasets
-const datasets = [
-  {
-    id: "tips",
-    name: "Restaurant Tips",
-    description: "Dataset containing restaurant tips and related information",
-  },
-  {
-    id: "iris",
-    name: "Iris Flower Dataset",
-    description: "Classic dataset containing measurements of iris flowers",
-  },
-  {
-    id: "diamonds",
-    name: "Diamonds Dataset",
-    description: "Dataset containing prices and attributes of diamonds",
-  },
-]
-
-// Sample data for visualizations
-const generateTipsData = () => {
-  return [
-    { day: "Thur", total_bill: 17.42, tip: 3.68, size: 3, time: "Lunch", sex: "Female" },
-    { day: "Fri", total_bill: 19.82, tip: 3.18, size: 2, time: "Lunch", sex: "Male" },
-    { day: "Sat", total_bill: 25.28, tip: 5.23, size: 4, time: "Dinner", sex: "Male" },
-    { day: "Sun", total_bill: 24.55, tip: 3.83, size: 2, time: "Dinner", sex: "Female" },
-    { day: "Thur", total_bill: 14.31, tip: 4.0, size: 2, time: "Lunch", sex: "Female" },
-    { day: "Fri", total_bill: 28.17, tip: 6.5, size: 3, time: "Dinner", sex: "Female" },
-    { day: "Sat", total_bill: 22.75, tip: 3.25, size: 2, time: "Dinner", sex: "Female" },
-    { day: "Sun", total_bill: 20.29, tip: 2.75, size: 2, time: "Dinner", sex: "Female" },
-    { day: "Thur", total_bill: 15.77, tip: 2.23, size: 2, time: "Lunch", sex: "Female" },
-    { day: "Fri", total_bill: 26.88, tip: 3.12, size: 4, time: "Lunch", sex: "Male" },
-    { day: "Sat", total_bill: 25.28, tip: 4.71, size: 4, time: "Dinner", sex: "Male" },
-    { day: "Sun", total_bill: 22.76, tip: 3.0, size: 2, time: "Dinner", sex: "Male" },
-    { day: "Thur", total_bill: 16.43, tip: 2.3, size: 2, time: "Lunch", sex: "Female" },
-    { day: "Fri", total_bill: 18.24, tip: 3.76, size: 2, time: "Lunch", sex: "Male" },
-    { day: "Sat", total_bill: 24.06, tip: 3.5, size: 3, time: "Dinner", sex: "Male" },
-    { day: "Sun", total_bill: 16.99, tip: 3.5, size: 3, time: "Dinner", sex: "Female" },
-  ]
-}
-
-const generateIrisData = () => {
-  return [
-    { sepal_length: 5.1, sepal_width: 3.5, petal_length: 1.4, petal_width: 0.2, species: "setosa" },
-    { sepal_length: 4.9, sepal_width: 3.0, petal_length: 1.4, petal_width: 0.2, species: "setosa" },
-    { sepal_length: 7.0, sepal_width: 3.2, petal_length: 4.7, petal_width: 1.4, species: "versicolor" },
-    { sepal_length: 6.4, sepal_width: 3.2, petal_length: 4.5, petal_width: 1.5, species: "versicolor" },
-    { sepal_length: 6.3, sepal_width: 3.3, petal_length: 6.0, petal_width: 2.5, species: "virginica" },
-    { sepal_length: 5.8, sepal_width: 2.7, petal_length: 5.1, petal_width: 1.9, species: "virginica" },
-    { sepal_length: 5.4, sepal_width: 3.9, petal_length: 1.7, petal_width: 0.4, species: "setosa" },
-    { sepal_length: 6.1, sepal_width: 2.8, petal_length: 4.0, petal_width: 1.3, species: "versicolor" },
-    { sepal_length: 6.5, sepal_width: 3.0, petal_length: 5.2, petal_width: 2.0, species: "virginica" },
-    { sepal_length: 5.0, sepal_width: 3.4, petal_length: 1.5, petal_width: 0.2, species: "setosa" },
-    { sepal_length: 5.5, sepal_width: 2.4, petal_length: 3.8, petal_width: 1.1, species: "versicolor" },
-    { sepal_length: 7.7, sepal_width: 3.8, petal_length: 6.7, petal_width: 2.2, species: "virginica" },
-  ]
-}
-
-const generateDiamondsData = () => {
-  return [
-    { carat: 0.23, cut: "Ideal", color: "E", clarity: "SI2", depth: 61.5, price: 326 },
-    { carat: 0.21, cut: "Premium", color: "E", clarity: "SI1", depth: 59.8, price: 326 },
-    { carat: 0.23, cut: "Good", color: "E", clarity: "VS1", depth: 56.9, price: 327 },
-    { carat: 0.29, cut: "Premium", color: "I", clarity: "VS2", depth: 62.4, price: 334 },
-    { carat: 0.31, cut: "Good", color: "J", clarity: "SI2", depth: 63.3, price: 335 },
-    { carat: 0.24, cut: "Very Good", color: "J", clarity: "VVS2", depth: 62.8, price: 336 },
-    { carat: 0.7, cut: "Ideal", color: "E", clarity: "VS2", depth: 61.7, price: 2757 },
-    { carat: 0.86, cut: "Premium", color: "H", clarity: "SI2", depth: 61.0, price: 2757 },
-    { carat: 0.75, cut: "Ideal", color: "D", clarity: "SI2", depth: 62.2, price: 2757 },
-    { carat: 0.69, cut: "Very Good", color: "F", clarity: "VS1", depth: 62.8, price: 2757 },
-  ]
-}
-
-// Sample correlation data
-const generateCorrelationData = (dataset: any[]) => {
-  if (!dataset || dataset.length === 0) return []
-
-  const numericColumns = Object.keys(dataset[0]).filter((key) => typeof dataset[0][key] === "number")
-
-  const correlationMatrix: any[] = []
-
-  numericColumns.forEach((col1) => {
-    const row: any = { name: col1 }
-
-    numericColumns.forEach((col2) => {
-      // Simulate correlation coefficient between -1 and 1
-      // In a real app, you would calculate actual correlation
-      if (col1 === col2) {
-        row[col2] = 1
-      } else {
-        // Generate a consistent correlation value for each pair
-        const seed = (col1 + col2).split("").reduce((a, b) => a + b.charCodeAt(0), 0)
-        const correlation = Math.sin(seed) * 0.8 // Value between -0.8 and 0.8
-        row[col2] = Number.parseFloat(correlation.toFixed(2))
+const datasets = {
+  normal: {
+    name: "Normal Distribution",
+    description: "A symmetric bell-shaped distribution with most values clustered around the mean.",
+    generateData: (mean = 50, stdDev = 10, size = 100) => {
+      // Box-Muller transform to generate normally distributed random numbers
+      const generateGaussian = (mean: number, stdDev: number) => {
+        const u1 = Math.random()
+        const u2 = Math.random()
+        const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2)
+        return z0 * stdDev + mean
       }
-    })
 
-    correlationMatrix.push(row)
-  })
+      return Array.from({ length: size }, () => generateGaussian(mean, stdDev))
+    },
+  },
+  rightSkewed: {
+    name: "Right-Skewed Distribution",
+    description: "A distribution with a long tail to the right, where mean > median.",
+    generateData: (mean = 30, skewness = 2, size = 100) => {
+      // Generate log-normal distribution (right-skewed)
+      const sigma = Math.sqrt(Math.log(1 + skewness))
+      const mu = Math.log(mean) - (sigma * sigma) / 2
 
-  return correlationMatrix
+      return Array.from({ length: size }, () => {
+        const z = Math.sqrt(-2.0 * Math.log(Math.random())) * Math.cos(2.0 * Math.PI * Math.random())
+        return Math.exp(mu + sigma * z)
+      })
+    },
+  },
+  leftSkewed: {
+    name: "Left-Skewed Distribution",
+    description: "A distribution with a long tail to the left, where mean < median.",
+    generateData: (mean = 70, skewness = 2, size = 100) => {
+      // Generate left-skewed distribution by reflecting a right-skewed one
+      const rightSkewed = datasets.rightSkewed.generateData(30, skewness, size)
+      const max = Math.max(...rightSkewed) * 2
+
+      return rightSkewed.map((value) => max - value)
+    },
+  },
 }
 
-// Generate summary statistics
-const calculateSummaryStats = (data: any[], column: string) => {
-  if (!data || data.length === 0) return null
+// Statistical functions
+const calculateMean = (data: number[]): number => {
+  return data.reduce((sum, value) => sum + value, 0) / data.length
+}
 
-  const values = data.map((d) => d[column]).filter((v) => typeof v === "number" && !isNaN(v))
-  if (values.length === 0) return null
+const calculateMedian = (data: number[]): number => {
+  const sorted = [...data].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
 
-  values.sort((a, b) => a - b)
+  if (sorted.length % 2 === 0) {
+    return (sorted[middle - 1] + sorted[middle]) / 2
+  }
 
-  const sum = values.reduce((acc, val) => acc + val, 0)
-  const mean = sum / values.length
+  return sorted[middle]
+}
 
-  const squaredDiffs = values.map((val) => Math.pow(val - mean, 2))
-  const variance = squaredDiffs.reduce((acc, val) => acc + val, 0) / values.length
-  const stdDev = Math.sqrt(variance)
+const calculateVariance = (data: number[], mean: number): number => {
+  return data.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / data.length
+}
 
-  const min = values[0]
-  const max = values[values.length - 1]
-  const q1 = values[Math.floor(values.length * 0.25)]
-  const median =
-    values.length % 2 === 0
-      ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
-      : values[Math.floor(values.length / 2)]
-  const q3 = values[Math.floor(values.length * 0.75)]
+const calculateStandardDeviation = (variance: number): number => {
+  return Math.sqrt(variance)
+}
 
-  return {
-    count: values.length,
-    mean: Number.parseFloat(mean.toFixed(2)),
-    std: Number.parseFloat(stdDev.toFixed(2)),
-    min: Number.parseFloat(min.toFixed(2)),
-    q1: Number.parseFloat(q1.toFixed(2)),
-    median: Number.parseFloat(median.toFixed(2)),
-    q3: Number.parseFloat(q3.toFixed(2)),
-    max: Number.parseFloat(max.toFixed(2)),
+const calculateMin = (data: number[]): number => {
+  return Math.min(...data)
+}
+
+const calculateMax = (data: number[]): number => {
+  return Math.max(...data)
+}
+
+const calculateQuantile = (data: number[], q: number): number => {
+  const sorted = [...data].sort((a, b) => a - b)
+  const pos = (sorted.length - 1) * q
+  const base = Math.floor(pos)
+  const rest = pos - base
+
+  if (sorted[base + 1] !== undefined) {
+    return sorted[base] + rest * (sorted[base + 1] - sorted[base])
+  } else {
+    return sorted[base]
   }
 }
 
-// Calculate missing values
-const calculateMissingValues = (data: any[]) => {
-  if (!data || data.length === 0) return []
-
-  const columns = Object.keys(data[0])
-  const result = []
-
-  for (const col of columns) {
-    const totalCount = data.length
-    const missingCount = data.filter((d) => d[col] === null || d[col] === undefined).length
-    const missingPercentage = (missingCount / totalCount) * 100
-
-    result.push({
-      column: col,
-      missing: missingCount,
-      percentage: Number.parseFloat(missingPercentage.toFixed(2)),
-    })
-  }
-
-  return result
-}
-
-// Generate distribution data
-const generateDistributionData = (data: any[], column: string, bins = 10) => {
-  if (!data || data.length === 0) return []
-
-  const values = data.map((d) => d[column]).filter((v) => typeof v === "number" && !isNaN(v))
-  if (values.length === 0) return []
-
-  const min = Math.min(...values)
-  const max = Math.max(...values)
+// Generate histogram data
+const generateHistogramData = (data: number[], bins = 10): { labels: string[]; values: number[] } => {
+  const min = Math.min(...data)
+  const max = Math.max(...data)
   const range = max - min
   const binWidth = range / bins
 
-  const histogramData = Array(bins)
+  const histogramValues = Array(bins).fill(0)
+  const histogramLabels = Array(bins)
     .fill(0)
-    .map((_, i) => ({
-      binStart: min + i * binWidth,
-      binEnd: min + (i + 1) * binWidth,
-      count: 0,
-      values: [] as number[],
-    }))
+    .map((_, i) => {
+      const binStart = min + i * binWidth
+      const binEnd = min + (i + 1) * binWidth
+      return `${binStart.toFixed(1)}-${binEnd.toFixed(1)}`
+    })
 
-  values.forEach((value) => {
-    const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1)
-    histogramData[binIndex].count++
-    histogramData[binIndex].values.push(value)
+  data.forEach((value) => {
+    // Handle edge case for max value
+    if (value === max) {
+      histogramValues[bins - 1]++
+      return
+    }
+
+    const binIndex = Math.floor((value - min) / binWidth)
+    histogramValues[binIndex]++
   })
 
-  return histogramData.map((bin) => ({
-    bin: `${bin.binStart.toFixed(1)}-${bin.binEnd.toFixed(1)}`,
-    count: bin.count,
-    frequency: bin.count / values.length,
-  }))
+  return { labels: histogramLabels, values: histogramValues }
 }
-
-// Generate categorical distribution
-const generateCategoricalDistribution = (data: any[], column: string) => {
-  if (!data || data.length === 0) return []
-
-  const counts: Record<string, number> = {}
-
-  data.forEach((d) => {
-    const value = String(d[column])
-    counts[value] = (counts[value] || 0) + 1
-  })
-
-  return Object.entries(counts).map(([category, count]) => ({
-    category,
-    count,
-    percentage: Number.parseFloat(((count / data.length) * 100).toFixed(2)),
-  }))
-}
-
-// COLORS
-const COLORS = [
-  "#8884d8",
-  "#83a6ed",
-  "#8dd1e1",
-  "#82ca9d",
-  "#a4de6c",
-  "#d0ed57",
-  "#ffc658",
-  "#ff8042",
-  "#ff6361",
-  "#bc5090",
-]
 
 export function EnhancedEdaDemo() {
-  const [selectedDataset, setSelectedDataset] = useState("tips")
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("overview")
-  const [selectedFeature, setSelectedFeature] = useState<string>("")
-  const [selectedFeatureType, setSelectedFeatureType] = useState<"numeric" | "categorical">("numeric")
-  const [selectedVisualization, setSelectedVisualization] = useState("histogram")
-  const [correlationMatrix, setCorrelationMatrix] = useState<any[]>([])
-  const [summaryStats, setSummaryStats] = useState<any>(null)
-  const [distributionData, setDistributionData] = useState<any[]>([])
-  const [missingValues, setMissingValues] = useState<any[]>([])
-  const [showOutliers, setShowOutliers] = useState(true)
-  const [binCount, setBinCount] = useState(10)
-  const [scatterX, setScatterX] = useState<string>("")
-  const [scatterY, setScatterY] = useState<string>("")
-  const [colorBy, setColorBy] = useState<string>("")
+  // Dataset selection and parameters
+  const [selectedDataset, setSelectedDataset] = useState<string>("normal")
+  const [datasetSize, setDatasetSize] = useState<number>(100)
+  const [binCount, setBinCount] = useState<number>(10)
 
-  // Load dataset
-  useEffect(() => {
-    setLoading(true)
+  // Statistical parameters that user can adjust
+  const [userMean, setUserMean] = useState<number>(50)
+  const [userStdDev, setUserStdDev] = useState<number>(10)
+  const [userSkewness, setUserSkewness] = useState<number>(2)
 
-    // Simulate API call to fetch dataset
-    setTimeout(() => {
-      let newData: any[] = []
+  // Generated data and calculated statistics
+  const [data, setData] = useState<number[]>([])
+  const [mean, setMean] = useState<number>(0)
+  const [median, setMedian] = useState<number>(0)
+  const [variance, setVariance] = useState<number>(0)
+  const [stdDev, setStdDev] = useState<number>(0)
+  const [min, setMin] = useState<number>(0)
+  const [max, setMax] = useState<number>(0)
+  const [q1, setQ1] = useState<number>(0)
+  const [q3, setQ3] = useState<number>(0)
 
-      if (selectedDataset === "tips") {
-        newData = generateTipsData()
-        setSelectedFeature("total_bill")
-        setScatterX("total_bill")
-        setScatterY("tip")
-        setColorBy("time")
-      } else if (selectedDataset === "iris") {
-        newData = generateIrisData()
-        setSelectedFeature("sepal_length")
-        setScatterX("sepal_length")
-        setScatterY("petal_length")
-        setColorBy("species")
-      } else if (selectedDataset === "diamonds") {
-        newData = generateDiamondsData()
-        setSelectedFeature("price")
-        setScatterX("carat")
-        setScatterY("price")
-        setColorBy("cut")
-      }
+  // Animation state
+  const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const [speed, setSpeed] = useState<number>(1)
+  const [activeTab, setActiveTab] = useState<string>("distribution")
+  const [showVideo, setShowVideo] = useState<boolean>(false)
 
-      setData(newData)
+  // Generate data based on selected dataset and parameters
+  const generateData = () => {
+    let newData: number[] = []
 
-      // Generate correlation matrix
-      const corrMatrix = generateCorrelationData(newData)
-      setCorrelationMatrix(corrMatrix)
-
-      // Calculate missing values
-      const missing = calculateMissingValues(newData)
-      setMissingValues(missing)
-
-      setLoading(false)
-    }, 800)
-  }, [selectedDataset])
-
-  // Update summary stats and distribution when feature changes
-  useEffect(() => {
-    if (!selectedFeature || data.length === 0) return
-
-    // Check if the selected feature is numeric or categorical
-    const firstValue = data[0][selectedFeature]
-    const isNumeric = typeof firstValue === "number"
-    setSelectedFeatureType(isNumeric ? "numeric" : "categorical")
-
-    // Calculate summary statistics for numeric features
-    if (isNumeric) {
-      const stats = calculateSummaryStats(data, selectedFeature)
-      setSummaryStats(stats)
-
-      // Generate distribution data
-      const distData = generateDistributionData(data, selectedFeature, binCount)
-      setDistributionData(distData)
-    } else {
-      // Generate categorical distribution
-      const catDist = generateCategoricalDistribution(data, selectedFeature)
-      setDistributionData(catDist)
-      setSummaryStats(null)
+    if (selectedDataset === "normal") {
+      newData = datasets.normal.generateData(userMean, userStdDev, datasetSize)
+    } else if (selectedDataset === "rightSkewed") {
+      newData = datasets.rightSkewed.generateData(userMean, userSkewness, datasetSize)
+    } else if (selectedDataset === "leftSkewed") {
+      newData = datasets.leftSkewed.generateData(userMean, userSkewness, datasetSize)
     }
-  }, [selectedFeature, data, binCount])
 
-  // Get available features from data
-  const getFeatures = () => {
-    if (!data || data.length === 0) return []
-    return Object.keys(data[0])
+    setData(newData)
+
+    // Calculate statistics
+    const calculatedMean = calculateMean(newData)
+    setMean(calculatedMean)
+
+    setMedian(calculateMedian(newData))
+
+    const calculatedVariance = calculateVariance(newData, calculatedMean)
+    setVariance(calculatedVariance)
+
+    setStdDev(calculateStandardDeviation(calculatedVariance))
+    setMin(calculateMin(newData))
+    setMax(calculateMax(newData))
+    setQ1(calculateQuantile(newData, 0.25))
+    setQ3(calculateQuantile(newData, 0.75))
   }
 
-  // Get numeric features only
-  const getNumericFeatures = () => {
-    if (!data || data.length === 0) return []
-    return Object.keys(data[0]).filter((key) => typeof data[0][key] === "number")
+  // Generate data when parameters change
+  useEffect(() => {
+    generateData()
+  }, [selectedDataset, userMean, userStdDev, userSkewness, datasetSize])
+
+  // Handle animation
+  useEffect(() => {
+    let animationInterval: NodeJS.Timeout | null = null
+
+    if (isPlaying) {
+      if (selectedDataset === "normal") {
+        let currentStdDev = userStdDev
+        animationInterval = setInterval(() => {
+          currentStdDev = currentStdDev >= 20 ? 5 : currentStdDev + 1
+          setUserStdDev(currentStdDev)
+        }, 1000 / speed)
+      } else {
+        let currentSkewness = userSkewness
+        animationInterval = setInterval(() => {
+          currentSkewness = currentSkewness >= 5 ? 1 : currentSkewness + 0.5
+          setUserSkewness(currentSkewness)
+        }, 1000 / speed)
+      }
+    }
+
+    return () => {
+      if (animationInterval) clearInterval(animationInterval)
+    }
+  }, [isPlaying, speed, selectedDataset, userStdDev, userSkewness])
+
+  // Prepare chart data
+  const histogramData = generateHistogramData(data, binCount)
+
+  const histogramChartData = {
+    labels: histogramData.labels,
+    datasets: [
+      {
+        label: "Frequency",
+        data: histogramData.values,
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        borderColor: "rgba(53, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
   }
 
-  // Get categorical features only
-  const getCategoricalFeatures = () => {
-    if (!data || data.length === 0) return []
-    return Object.keys(data[0]).filter((key) => typeof data[0][key] !== "number")
+  // Normal distribution curve
+  const generateNormalDistributionCurve = () => {
+    const points = 100
+    const xMin = Math.min(min, mean - 3 * stdDev)
+    const xMax = Math.max(max, mean + 3 * stdDev)
+
+    const labels = Array.from({ length: points }, (_, i) => {
+      return xMin + (i / (points - 1)) * (xMax - xMin)
+    })
+
+    const values = labels.map((x) => {
+      const exponent = -Math.pow(x - mean, 2) / (2 * variance)
+      return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent)
+    })
+
+    // Scale the values to match the histogram scale
+    const maxValue = Math.max(...histogramData.values)
+    const maxNormalValue = Math.max(...values)
+    const scaledValues = values.map((v) => (v / maxNormalValue) * maxValue)
+
+    return { labels, values: scaledValues }
   }
 
-  // Render loading state
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-10 w-48" />
-        </div>
+  const normalDistribution = generateNormalDistributionCurve()
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-full" />
-              </CardContent>
-            </Card>
-          </div>
+  const distributionChartData = {
+    labels: normalDistribution.labels,
+    datasets: [
+      {
+        type: "line" as const,
+        label: "Normal Distribution",
+        data: normalDistribution.values,
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        yAxisID: "y",
+      },
+      {
+        type: "bar" as const,
+        label: "Histogram",
+        data: histogramData.values,
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        borderColor: "rgba(53, 162, 235, 1)",
+        borderWidth: 1,
+        barPercentage: 1,
+        categoryPercentage: 1,
+        yAxisID: "y",
+      },
+    ],
+  }
 
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-48" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-[300px] w-full" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
+  // Scatter plot data
+  const scatterPlotData = {
+    datasets: [
+      {
+        label: "Data Points",
+        data: data.map((value, index) => ({ x: index, y: value })),
+        backgroundColor: "rgba(75, 192, 192, 0.5)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+      },
+      {
+        label: "Mean",
+        data: data.map((_, index) => ({ x: index, y: mean })),
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        showLine: true,
+      },
+      {
+        label: "Median",
+        data: data.map((_, index) => ({ x: index, y: median })),
+        backgroundColor: "rgba(54, 162, 235, 0.5)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+      },
+    ],
+  }
+
+  // Box plot data (simplified as a line chart)
+  const boxPlotData = {
+    labels: ["Box Plot"],
+    datasets: [
+      {
+        label: "Min",
+        data: [min],
+        backgroundColor: "rgba(75, 192, 192, 0.5)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Q1",
+        data: [q1],
+        backgroundColor: "rgba(54, 162, 235, 0.5)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Median",
+        data: [median],
+        backgroundColor: "rgba(255, 206, 86, 0.5)",
+        borderColor: "rgba(255, 206, 86, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Q3",
+        data: [q3],
+        backgroundColor: "rgba(153, 102, 255, 0.5)",
+        borderColor: "rgba(153, 102, 255, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Max",
+        data: [max],
+        backgroundColor: "rgba(255, 159, 64, 0.5)",
+        borderColor: "rgba(255, 159, 64, 1)",
+        borderWidth: 1,
+      },
+    ],
+  }
+
+  // Reset to default values
+  const handleReset = () => {
+    setIsPlaying(false)
+    setUserMean(50)
+    setUserStdDev(10)
+    setUserSkewness(2)
+    setBinCount(10)
+    setDatasetSize(100)
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Exploratory Data Analysis</h2>
-          <p className="text-muted-foreground">
-            Analyze and visualize datasets to understand patterns and relationships
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Select value={selectedDataset} onValueChange={setSelectedDataset}>
-            <SelectTrigger className="w-[220px]">
-              <Database className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Select dataset" />
-            </SelectTrigger>
-            <SelectContent>
-              {datasets.map((dataset) => (
-                <SelectItem key={dataset.id} value={dataset.id}>
-                  {dataset.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Refresh data</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
-      
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertTitle>Dataset Information</AlertTitle>
-        <AlertDescription>
-          {selectedDataset === "tips" && "Restaurant tips dataset with information about bills, tips, and customer details."}
-          {selectedDataset === "iris" && "Classic Iris flower dataset with measurements of sepal and petal dimensions for three species."}
-          {selectedDataset === "diamonds" && "Diamonds dataset with information about carat, cut, color, clarity, and price."}
-        </AlertDescription>
-      </Alert>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 md:w-[600px]">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="distributions">Distributions</TabsTrigger>
-          <TabsTrigger value="relationships">Relationships</TabsTrigger>
-          <TabsTrigger value="data-quality">Data Quality</TabsTrigger>
-        </TabsList>
-        
-        {/* OVERVIEW TAB */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1">
-              <CardHeader>
-                <CardTitle>Dataset Summary</CardTitle>
-                <CardDescription>
-                  Basic information about the dataset
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Number of Records</h4>
-                  <div className="text-2xl font-bold">{data.length}</div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Number of Features</h4>
-                  <div className="text-2xl font-bold">{getFeatures().length}</div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Feature Types</h4>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-primary"></span>
-                      Numeric: {getNumericFeatures().length}
-                    </Badge>
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-orange-500"></span>
-                      Categorical: {getCategoricalFeatures().length}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Missing Values</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold">
-                      {missingValues.reduce((acc, curr) => acc + curr.missing, 0)}
-                    </span>
-                    <span className="text-muted-foreground text-sm">
-                      ({((missingValues.reduce((acc, curr) => acc + curr.missing, 0) / (data.length * getFeatures().length)) * 100).toFixed(2)}%)
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Feature Overview</CardTitle>
-                  <CardDescription>
-                    Summary of available features
-                  </CardDescription>
-                </div>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <div className="grid grid-cols-4 bg-muted p-3 rounded-t-md">
-                    <div className="font-medium">Feature</div>
-                    <div className="font-medium">Type</div>
-                    <div className="font-medium">Unique Values</div>
-                    <div className="font-medium">Missing</div>
-                  </div>
-                  <div className="divide-y max-h-[300px] overflow-auto">
-                    {getFeatures().map((feature) => {
-                      const uniqueValues = new Set(data.map(d => d[feature])).size
-                      const missingCount = data.filter(d => d[feature] === null || d[feature] === undefined).length
-                      const featureType = typeof data[0][feature] === 'number' ? 'Numeric' : 'Categorical'
-                      
-                      return (
-                        <div key={feature} className="grid grid-cols-4 p-3 hover:bg-muted/50">
-                          <div className="font-medium">{feature}</div>
-                          <div>
-                            <Badge variant={featureType === 'Numeric' ? 'default' : 'secondary'}>
-                              {featureType}
-                            </Badge>
-                          </div>
-                          <div>{uniqueValues}</div>
-                          <div className="flex items-center gap-2">
-                            {missingCount > 0 ? (
-                              <>
-                                <span className="text-red-500">{missingCount}</span>
-                                <span className="text-muted-foreground text-xs">
-                                  ({((missingCount / data.length) * 100).toFixed(1)}%)
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-green-500">0</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-4 items-start">
+        {/* Main visualization area */}
+        <Card className="p-6 flex-1">
+          <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h3 className="text-xl font-semibold">Statistical Visualization</h3>
+              <p className="text-muted-foreground">
+                Explore how changing statistical parameters affects data distribution
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => setIsPlaying(!isPlaying)}>
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+              <Button variant="outline" size="icon" onClick={handleReset}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Select value={speed.toString()} onValueChange={(value) => setSpeed(Number(value))}>
+                <SelectTrigger className="w-24">
+                  <SelectValue placeholder="Speed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0.5">0.5x</SelectItem>
+                  <SelectItem value="1">1x</SelectItem>
+                  <SelectItem value="1.5">1.5x</SelectItem>
+                  <SelectItem value="2">2x</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Correlation Matrix</CardTitle>
-              <CardDescription>
-                Explore relationships between numeric features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full overflow-auto">
-                <div className="min-w-[600px] min-h-[400px]">
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ChartContainer>
-                      {correlationMatrix.length > 0 ? (
-                        <div className="grid grid-cols-[auto_1fr] gap-4">
-                          <div></div>
-                          <div className="grid" style={{ 
-                            gridTemplateColumns: `repeat(${getNumericFeatures().length}, minmax(80px, 1fr))` 
-                          }}>
-                            {getNumericFeatures().map((feature) => (
-                              <div key={feature} className="px-2 py-1 text-sm font-medium text-center truncate">
-                                {feature}
-                              </div>
-                            ))}
-                          </div>
-                          
-                          {correlationMatrix.map((row, rowIndex) => (
-                            <React.Fragment key={rowIndex}>
-                              <div className="flex items-center px-2 py-1 text-sm font-medium">
-                                {row.name}
-                              </div>
-                              
-                              <div className="grid" style={{ 
-                                gridTemplateColumns: `repeat(${getNumericFeatures().length}, minmax(80px, 1fr))` 
-                              }}>
-                                {getNumericFeatures().map((feature) => {
-                                  const value = row[feature]
-                                  let color = "bg-gray-200 dark:bg-gray-700"
-                                  
-                                  if (value === 1) {
-                                    color = "bg-primary/90"
-                                  } else if (value >= 0.7) {
-                                    color = "bg-primary/70"
-                                  } else if (value >= 0.4) {
-                                    color = "bg-primary/50"
-                                  } else if (value >= 0.1) {
-                                    color = "bg-primary/30"
-                                  } else if (value >= -0.1) {
-                                    color = "bg-gray-200 dark:bg-gray-700"
-                                  } else if (value >= -0.4) {
-                                    color = "bg-red-300/30"
-                                  } else if (value >= -0.7) {
-                                    color = "bg-red-300/50"
-                                  } else {
-                                    color = "bg-red-300/70"
-                                  }
-                                  
-                                  return (
-                                    <div 
-                                      key={feature} 
-                                      className={`m-1 p-2 rounded-md text-center ${color} hover:opacity-80 transition-opacity`}
-                                      title={`${row.name} vs ${feature}: ${value}`}
-                                    >
-                                      {value}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <p className="text-muted-foreground">No numeric features available for correlation analysis</p>
-                        </div>
-                      )}
-                    </ChartContainer>
-                  </ResponsiveContainer>
-                </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-4">
+              <TabsTrigger value="distribution">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Distribution
+              </TabsTrigger>
+              <TabsTrigger value="scatter">
+                <ScatterChartIcon className="h-4 w-4 mr-2" />
+                Data Points
+              </TabsTrigger>
+              <TabsTrigger value="statistics">
+                <LineChart className="h-4 w-4 mr-2" />
+                Statistics
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="distribution" className="space-y-4">
+              <div className="aspect-[16/9] bg-card rounded-md">
+                <Chart
+                  type="bar"
+                  data={distributionChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        title: {
+                          display: true,
+                          text: "Frequency",
+                        },
+                      },
+                      x: {
+                        title: {
+                          display: true,
+                          text: "Value",
+                        },
+                      },
+                    },
+                    plugins: {
+                      legend: {
+                        position: "top" as const,
+                      },
+                      title: {
+                        display: true,
+                        text: `Distribution with Mean=${mean.toFixed(2)}, Median=${median.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          title: (context) => `Value: ${context[0].label}`,
+                        },
+                      },
+                    },
+                  }}
+                />
               </div>
-              
-              <div className="mt-4 text-sm text-muted-foreground">
-                <p>
-                  <span className="font-medium">Correlation interpretation:</span> Values close to 1 indicate strong positive correlation, 
-                  values close to -1 indicate strong negative correlation, and values close to 0 indicate little to no correlation.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* DISTRIBUTIONS TAB */}
-        <TabsContent value="distributions" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1">
-              <CardHeader>
-                <CardTitle>Feature Selection</CardTitle>
-                <CardDescription>
-                  Select a feature to analyze its distribution
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="feature-select">Feature</Label>
-                  <Select value={selectedFeature} onValueChange={setSelectedFeature}>
-                    <SelectTrigger id="feature-select">
-                      <SelectValue placeholder="Select feature" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <div className="mb-2 px-2 text-xs text-muted-foreground font-medium">Numeric Features</div>
-                      {getNumericFeatures().map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature}
-                        </SelectItem>
-                      ))}
-                      <Separator className="my-2" />
-                      <div className="mb-2 px-2 text-xs text-muted-foreground font-medium">Categorical Features</div>
-                      {getCategoricalFeatures().map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {selectedFeatureType === "numeric" && (
-                  <>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label htmlFor="bin-count">Number of Bins</Label>
-                        <span className="text-sm text-muted-foreground">{binCount}</span>
-                      </div>
-                      <Slider 
-                        id="bin-count"
-                        min={5} 
-                        max={20} 
-                        step={1} 
-                        value={[binCount]} 
-                        onValueChange={(value) => setBinCount(value[0])} 
-                      />
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Switch 
-                        id="show-outliers" 
-                        checked={showOutliers} 
-                        onCheckedChange={setShowOutliers} 
-                      />
-                      <Label htmlFor="show-outliers">Show Outliers</Label>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="visualization-type">Visualization Type</Label>
-                      <Select value={selectedVisualization} onValueChange={setSelectedVisualization}>
-                        <SelectTrigger id="visualization-type">
-                          <SelectValue placeholder="Select visualization" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="histogram">Histogram</SelectItem>
-                          <SelectItem value="boxplot">Box Plot</SelectItem>
-                          <SelectItem value="density">Density Plot</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-                
-                {selectedFeatureType === "categorical" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="visualization-type">Visualization Type</Label>
-                    <Select value={selectedVisualization} onValueChange={setSelectedVisualization}>
-                      <SelectTrigger id="visualization-type">
-                        <SelectValue placeholder="Select visualization" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bar">Bar Chart</SelectItem>
-                        <SelectItem value="pie">Pie Chart</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
-                {summaryStats && (
-                  <div className="space-y-2 pt-4 border-t">
-                    <h4 className="font-medium">Summary Statistics</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Count:</span>
-                        <span className="font-medium">{summaryStats.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Mean:</span>
-                        <span className="font-medium">{summaryStats.mean}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Std Dev:</span>
-                        <span className="font-medium">{summaryStats.std}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Min:</span>
-                        <span className="font-medium">{summaryStats.min}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Q1:</span>
-                        <span className="font-medium">{summaryStats.q1}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Median:</span>
-                        <span className="font-medium">{summaryStats.median}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Q3:</span>
-                        <span className="font-medium">{summaryStats.q3}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Max:</span>
-                        <span className="font-medium">{summaryStats.max}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>
-                  Distribution of {selectedFeature}
-                </CardTitle>
-                <CardDescription>
-                  {selectedFeatureType === "numeric" 
-                    ? "Visualize the distribution of values" 
-                    : "Visualize the frequency of categories"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedFeatureType === "numeric" && (
-                  <div className="h-[400px]">
-                    {selectedVisualization === "histogram" && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={distributionData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="bin" />
-                          <YAxis />
-                          <RechartsTooltip 
-                            formatter={(value: any, name: any) => [value, name === "count" ? "Count" : "Frequency"]}
-                            labelFormatter={(label) => `Range: ${label}`}
-                          />
-                          <Bar dataKey="count" fill="#8884d8" name="Count" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                    
-                    {selectedVisualization === "boxplot" && (
-                      <div className="flex items-center justify-center h-full">
-                        <div className="w-full max-w-md">
-                          <div className="relative h-20">
-                            <div className="absolute inset-0 flex items-center">
-                              <div className="w-full h-0.5 bg-muted-foreground/30"></div>
-                            </div>
-                            
-                            {/* Min */}
-                            <div 
-                              className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
-                              style={{ left: "0%" }}
-                            >
-                              <div className="h-full w-0.5 bg-muted-foreground/50"></div>
-                              <div className="mt-2 text-xs">{summaryStats.min}</div>
-                            </div>
-                            
-                            {/* Q1 */}
-                            <div 
-                              className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
-                              style={{ 
-                                left: `${((summaryStats.q1 - summaryStats.min) / (summaryStats.max - summaryStats.min)) * 100}%` 
-                              }}
-                            >
-                              <div className="h-full w-0.5 bg-primary"></div>
-                            </div>
-                            
-                            {/* Box from Q1 to Q3 */}
-                            <div 
-                              className="absolute top-1/4 h-1/2 bg-primary/20"
-                              style={{ 
-                                left: `${((summaryStats.q1 - summaryStats.min) / (summaryStats.max - summaryStats.min)) * 100}%`,
-                                width: `${((summaryStats.q3 - summaryStats.q1) / (summaryStats.max - summaryStats.min)) * 100}%`
-                              }}
-                            ></div>
-                            
-                            {/* Median */}
-                            <div 
-                              className="absolute top-1/4 bottom-1/4 flex flex-col items-center justify-center"
-                              style={{ 
-                                left: `${((summaryStats.median - summaryStats.min) / (summaryStats.max - summaryStats.min)) * 100}%` 
-                              }}
-                            >
-                              <div className="h-full w-1 bg-primary"></div>
-                            </div>
-                            
-                            {/* Q3 */}
-                            <div 
-                              className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
-                              style={{ 
-                                left: `${((summaryStats.q3 - summaryStats.min) / (summaryStats.max - summaryStats.min)) * 100}%` 
-                              }}
-                            >
-                              <div className="h-full w-0.5 bg-primary"></div>
-                            </div>
-                            
-                            {/* Max */}
-                            <div 
-                              className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
-                              style={{ left: "100%" }}
-                            >
-                              <div className="h-full w-0.5 bg-muted-foreground/50"></div>
-                              <div className="mt-2 text-xs">{summaryStats.max}</div>
-                            </div>
-                            
-                            {/* Mean indicator */}
-                            <div 
-                              className="absolute top-0 flex flex-col items-center justify-center"
-                              style={{ 
-                                left: `${((summaryStats.mean - summaryStats.min) / (summaryStats.max - summaryStats.min)) * 100}%` 
-                              }}
-                            >
-                              <div className="h-5 w-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">μ</div>
-                              <div className="mt-1 text-xs text-red-500">{summaryStats.mean}</div>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-12 text-center text-sm text-muted-foreground">
-                            <div className="flex items-center justify-center gap-4">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-primary"></div>
-                                <span>IQR (Q1-Q3)</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                <span>Mean</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-primary/50"></div>
-                                <span>Median</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {selectedVisualization === "density" && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={distributionData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="bin" />
-                          <YAxis />
-                          <RechartsTooltip 
-                            formatter={(value: any) => [value, "Frequency"]}
-                            labelFormatter={(label) => `Range: ${label}`}
-                          />
-                          <Area type="monotone" dataKey="frequency" stroke="#8884d8" fill="#8884d8" />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                )}
-                
-                {selectedFeatureType === "categorical" && (
-                  <div className="h-[400px]">
-                    {selectedVisualization === "bar" && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={distributionData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="category" />
-                          <YAxis />
-                          <RechartsTooltip 
-                            formatter={(value: any, name: any) => [value, name === "count" ? "Count" : "Percentage"]}
-                            labelFormatter={(label) => `Category: ${label}`}
-                          />
-                          <Bar dataKey="count" fill="#8884d8" name="Count">
-                            {distributionData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                    
-                    {selectedVisualization === "pie" && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={distributionData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={true}
-                            outerRadius={120}
-                            fill="#8884d8"
-                            dataKey="count"
-                            nameKey="category"
-                            label={({ category, percentage }) => `${category}: ${percentage}%`}
-                          >
-                            {distributionData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip 
-                            formatter={(value: any, name: any, props: any) => [
-                              `Count: ${value} (${props.payload.percentage}%)`, 
-                              props.payload.category
-                            ]}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        {/* RELATIONSHIPS TAB */}
-        <TabsContent value="relationships" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Relationships</CardTitle>
-              <CardDescription>
-                Explore relationships between different features
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="x-feature">X-Axis Feature</Label>
-                  <Select value={scatterX} onValueChange={setScatterX}>
-                    <SelectTrigger id="x-feature">
-                      <SelectValue placeholder="Select X feature" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getNumericFeatures().map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="y-feature">Y-Axis Feature</Label>
-                  <Select value={scatterY} onValueChange={setScatterY}>
-                    <SelectTrigger id="y-feature">
-                      <SelectValue placeholder="Select Y feature" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getNumericFeatures().map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="color-by">Color By</Label>
-                  <Select value={colorBy} onValueChange={setColorBy}>
-                    <SelectTrigger id="color-by">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {getCategoricalFeatures().map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="h-[500px]">
-                {scatterX && scatterY && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                      <CartesianGrid />
-                      <XAxis 
-                        type="number" 
-                        dataKey={scatterX} 
-                        name={scatterX} 
-                        label={{ value: scatterX, position: 'bottom' }} 
-                      />
-                      <YAxis 
-                        type="number" 
-                        dataKey={scatterY} 
-                        name={scatterY} 
-                        label={{ value: scatterY, angle: -90, position: 'left' }} 
-                      />
-                      <RechartsTooltip 
-                        cursor={{ strokeDasharray: '3 3' }} 
-                        formatter={(value: any, name: any) => [value, name]}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-background border rounded-md shadow-md p-2 text-sm">
-                                <p className="font-medium">{colorBy ? `${colorBy}: ${payload[0].payload[colorBy]}` : 'Data Point'}</p>
-                                <p>{`${scatterX}: ${payload[0].value}`}</p>
-                                <p>{`${scatterY}: ${payload[1].value}`}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend />
-                      
-                      {colorBy ? (
-                        (() => {
-                          // Get unique categories
-                          const categories = [...new Set(data.map(d => d[colorBy]))];
-                          
-                          return categories.map((category, index) => {
-                            const filteredData = data.filter(d => d[colorBy] === category);
-                            
-                            return (
-                              <Scatter 
-                                key={category} 
-                                name={`${category}`} 
-                                data={filteredData} 
-                                fill={COLORS[index % COLORS.length]} 
-                              />
-                            );
-                          });
-                        })()
-                      ) : (
-                        <Scatter name="All Data" data={data} fill="#8884d8" />
-                      )}
-                    </ScatterChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-              
-              {scatterX && scatterY && (
-                <div className="p-4 bg-muted rounded-md">
-                  <h4 className="font-medium mb-2">Relationship Analysis</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {(() => {
-                      if (!data || data.length === 0) return "No data available for analysis.";
-                      
-                      // Calculate correlation between X and Y
-                      const xValues = data.map(d => d[scatterX]);
-                      const yValues = data.map(d => d[scatterY]);
-                      
-                      // Find correlation row for X
-                      const corrRow = correlationMatrix.find(row => row.name === scatterX);
-                      const correlation = corrRow ? corrRow[scatterY] : null;
-                      
-                      if (correlation === null) return "Correlation could not be calculated.";
-                      
-                      let relationshipDesc = "";
-                      if (correlation > 0.7) {
-                        relationshipDesc = "strong positive";
-                      } else if (correlation > 0.3) {
-                        relationshipDesc = "moderate positive";
-                      } else if (correlation > 0) {
-                        relationshipDesc = "weak positive";
-                      } else if (correlation > -0.3) {
-                        relationshipDesc = "weak negative";
-                      } else if (correlation > -0.7) {
-                        relationshipDesc = "moderate negative";
-                      } else {
-                        relationshipDesc = "strong negative";
-                      }
-                      
-                      return `There appears to be a ${relationshipDesc} correlation (${correlation.toFixed(2)}) between ${scatterX} and ${scatterY}.`;
-                    })()}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* DATA QUALITY TAB */}
-        <TabsContent value="data-quality" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Missing Values</CardTitle>
-                <CardDescription>
-                  Analyze missing values in the dataset
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {missingValues.some(mv => mv.missing > 0) ? (
-                    <>
-                      <div className="space-y-3">
-                        {missingValues
-                          .filter(mv => mv.missing > 0)
-                          .sort((a, b) => b.missing - a.missing)
-                          .map(mv => (
-                            <div key={mv.column} className="space-y-1">
-                              <div className="flex justify-between text-sm">
-                                <span>{mv.column}</span>
-                                <span className="text-muted-foreground">
-                                  {mv.missing} ({mv.percentage}%)
-                                </span>
-                              </div>
-                              <Progress value={mv.percentage} className="h-2" />
-                            </div>
-                          ))}
-                      </div>
-                      
-                      <div className="pt-2 text-sm text-muted-foreground">
-                        <p>
-                          <AlertCircle className="inline-block h-4 w-4 mr-1" />
-                          Missing values may affect analysis results. Consider imputation or filtering.
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <CheckCircle className="h-12 w-12 text-green-500 mb-2" />
-                      <h3 className="text-lg font-medium">No Missing Values</h3>
-                      <p className="text-muted-foreground">
-                        This dataset is complete with no missing values.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Outlier Detection</CardTitle>
-                <CardDescription>
-                  Identify potential outliers in numeric features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {getNumericFeatures().length > 0 ? (
-                    <>
-                      <div className="space-y-4">
-                        {getNumericFeatures().map(feature => {
-                          const stats = calculateSummaryStats(data, feature);
-                          if (!stats) return null;
-                          
-                          // Calculate IQR and outlier boundaries
-                          const iqr = stats.q3 - stats.q1;
-                          const lowerBound = stats.q1 - 1.5 * iqr;
-                          const upperBound = stats.q3 + 1.5 * iqr;
-                          
-                          // Count outliers
-                          const outliers = data.filter(d => {
-                            const val = d[feature];
-                            return typeof val === 'number' && (val < lowerBound || val > upperBound);
-                          });
-                          
-                          const outlierPercentage = (outliers.length / data.length) * 100;
-                          
-                          return (
-                            <div key={feature} className="space-y-1">
-                              <div className="flex justify-between text-sm">
-                                <span>{feature}</span>
-                                <span className="text-muted-foreground">
-                                  {outliers.length} outliers ({outlierPercentage.toFixed(1)}%)
-                                </span>
-                              </div>
-                              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="absolute h-full bg-primary rounded-full" 
-                                  style={{ 
-                                    left: `${((lowerBound - stats.min) / (stats.max - stats.min)) * 100}%`,
-                                    width: `${((upperBound - lowerBound) / (stats.max - stats.min)) * 100}%`
-                                  }}
-                                ></div>
-                              </div>
-                              <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>Min: {stats.min}</span>
-                                <span>Lower: {lowerBound.toFixed(2)}</span>
-                                <span>Upper: {upperBound.toFixed(2)}</span>
-                                <span>Max: {stats.max}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      
-                      <div className="pt-2 text-sm text-muted-foreground">
-                        <p>
-                          <Info className="inline-block h-4 w-4 mr-1" />
-                          Outliers are defined as values below Q1-1.5*IQR or above Q3+1.5*IQR.
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <AlertCircle className="h-12 w-12 text-muted-foreground mb-2" />
-                      <h3 className="text-lg font-medium">No Numeric Features</h3>
-                      <p className="text-muted-foreground">
-                        Outlier detection requires numeric features.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Quality Report</CardTitle>
-              <CardDescription>
-                Summary of data quality issues and recommendations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="p-2 bg-primary/10 rounded-full">
-                        <Database className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="font-medium">Completeness</h3>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Progress 
-                        value={100 - ((missingValues.reduce((acc, curr) => acc + curr.missing, 0) / (data.length * getFeatures().length)) * 100)}
-                        className="h-2" 
-                      />
-                      
-                      <div className="flex justify-between text-sm">
-                        <span>Missing Values:</span>
-                        <span className="font-medium">
-                          {missingValues.reduce((acc, curr) => acc + curr.missing, 0)} / {data.length * getFeatures().length}
-                        </span>
-                      </div>
-                      
-                      <div className="text-xs text-muted-foreground">
-                        {missingValues.some(mv => mv.missing > 0) ? (
-                          <p>Some features have missing values that may need to be addressed.</p>
-                        ) : (
-                          <p>Dataset is complete with no missing values.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="p-2 bg-primary/10 rounded-full">
-                        <Filter className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="font-medium">Outliers</h3>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {getNumericFeatures().length > 0 ? (
-                        <>
-                          <div className="text-sm">
-                            <span>Features with outliers:</span>
-                            <span className="font-medium ml-1">
-                              {getNumericFeatures().filter(feature => {
-                                const stats = calculateSummaryStats(data, feature);
-                                if (!stats) return false;
-                                
-                                const iqr = stats.q3 - stats.q1;
-                                const lowerBound = stats.q1 - 1.5 * iqr;
-                                const upperBound = stats.q3 + 1.5 * iqr;
-                                
-                                return data.some(d => {
-                                  const val = d[feature];
-                                  return typeof val === 'number' && (val < lowerBound || val > upperBound);
-                                });
-                              }).length} / {getNumericFeatures().length}
-                            </span>
-                          </div>
-                          
-                          <div className="text-xs text-muted-foreground">
-                            <p>Consider transforming or removing outliers for better analysis results.</p>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-xs text-muted-foreground">
-                          <p>No numeric features available for outlier detection.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="p-2 bg-primary/10 rounded-full">
-                        <Zap className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="font-medium">Recommendations</h3>
-                    </div>
-                    
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <ul className="space-y-1 list-disc list-inside">
-                        {missingValues.some(mv => mv.missing > 0) && (
-                          <li>Consider imputing missing values or removing incomplete records</li>
-                        )}
-                        
-                        {getNumericFeatures().some(feature => {
-                          const stats = calculateSummaryStats(data, feature);
-                          if (!stats) return false;
-                          
-                          const iqr = stats.q3 - stats.q1;
-                          const lowerBound = stats.q1 - 1.5 * iqr;
-                          const upperBound = stats.q3 + 1.5 * iqr;
-                          
-                          return data.some(d => {
-                            const val = d[feature];
-                            return typeof val === 'number' && (val < lowerBound || val > upperBound);
-                          });
-                        }) && (
-                          <li>Address outliers through transformation or removal</li>
-                        )}
-                        
-                        <li>Explore feature correlations to identify potential redundancies</li>
-                        <li>Consider feature scaling for machine learning applications</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t">
-                  <h3 className="font-medium mb-2">Data Quality Score</h3>
+                  <label className="text-sm font-medium mb-2 block">Number of Bins</label>
                   <div className="flex items-center gap-4">
-                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
-                      {(() => {
-                        // Calculate a simple data quality score
-                        const missingPercentage = (missingValues.reduce((acc, curr) => acc + curr.missing, 0) / (data.length * getFeatures().length)) * 100;
-                        
-                        // Count features with outliers
-                        const featuresWithOutliers = getNumericFeatures().filter(feature => {
-                          const stats = calculateSummaryStats(data, feature);
-                          if (!stats) return false;
-                          
-                          const iqr = stats.q3 - stats.q1;
-                          const lowerBound = stats.q1 - 1.5 * iqr;
-                          const upperBound = stats.q3 + 1.5 * iqr;
-                          
-                          return data.some(d => {
-                            const val = d[feature];
-                            return typeof val === 'number' && (val < lowerBound || val > upperBound);
-                          });
-                        }).length;
-                        
-                        const outlierPercentage = getNumericFeatures().length > 0 
-                          ? (featuresWithOutliers / getNumericFeatures().length) * 100 / 3 // Divide by 3 to reduce impact
-                          : 0;
-                        
-                        // Calculate score (100 - penalties)
-                        const score = 100 - missingPercentage - outlierPercentage;
-                        
-                        // Determine color based on score
-                        let color = "bg-red-500";
-                        if (score >= 90) {
-                          color = "bg-green-500";
-                        } else if (score >= 70) {
-                          color = "bg-yellow-500";
-                        } else if (score >= 50) {
-                          color = "bg-orange-500";
-                        }
-                        
-                        return (
-                          <>
-                            <div className={`h-full ${color}`} style={{ width: `${score}%` }}></div>
-                            <span className="ml-2 text-sm font-medium">{Math.round(score)}%</span>
-                          </>
-                        );
-                      })()}
-                    </div>
+                    <Slider
+                      value={[binCount]}
+                      min={5}
+                      max={30}
+                      step={1}
+                      className="flex-1"
+                      onValueChange={(value) => setBinCount(value[0])}
+                    />
+                    <span className="text-sm w-8 text-right">{binCount}</span>
                   </div>
-                  
-                  <div className="mt-4 text-sm text-muted-foreground">
-                    <p>
-                      This score is based on data completeness, outlier presence, and other quality factors. 
-                      Higher scores indicate better quality data for analysis.
-                    </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Sample Size</label>
+                  <div className="flex items-center gap-4">
+                    <Slider
+                      value={[datasetSize]}
+                      min={20}
+                      max={500}
+                      step={10}
+                      className="flex-1"
+                      onValueChange={(value) => setDatasetSize(value[0])}
+                    />
+                    <span className="text-sm w-8 text-right">{datasetSize}</span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            <TabsContent value="scatter" className="space-y-4">
+              <div className="aspect-[16/9] bg-card rounded-md">
+                <Scatter
+                  data={scatterPlotData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                      y: {
+                        title: {
+                          display: true,
+                          text: "Value",
+                        },
+                      },
+                      x: {
+                        title: {
+                          display: true,
+                          text: "Index",
+                        },
+                      },
+                    },
+                    plugins: {
+                      legend: {
+                        position: "top" as const,
+                      },
+                      title: {
+                        display: true,
+                        text: `Data Points with Mean and Median Lines`,
+                      },
+                    },
+                  }}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Mean vs Median</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Mean:</div>
+                      <div className="text-right font-medium">{mean.toFixed(2)}</div>
+                      <div>Median:</div>
+                      <div className="text-right font-medium">{median.toFixed(2)}</div>
+                      <div>Difference:</div>
+                      <div className="text-right font-medium">{(mean - median).toFixed(2)}</div>
+                      <div>Skewness:</div>
+                      <div className="text-right font-medium">
+                        {mean > median
+                          ? "Positive (right-skewed)"
+                          : mean < median
+                            ? "Negative (left-skewed)"
+                            : "Symmetric"}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Data Range</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Minimum:</div>
+                      <div className="text-right font-medium">{min.toFixed(2)}</div>
+                      <div>Maximum:</div>
+                      <div className="text-right font-medium">{max.toFixed(2)}</div>
+                      <div>Range:</div>
+                      <div className="text-right font-medium">{(max - min).toFixed(2)}</div>
+                      <div>IQR:</div>
+                      <div className="text-right font-medium">{(q3 - q1).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="statistics" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Central Tendency</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Mean:</div>
+                      <div className="text-right font-medium">{mean.toFixed(2)}</div>
+                      <div>Median:</div>
+                      <div className="text-right font-medium">{median.toFixed(2)}</div>
+                      <div>Difference:</div>
+                      <div className="text-right font-medium">{(mean - median).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Dispersion</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Variance:</div>
+                      <div className="text-right font-medium">{variance.toFixed(2)}</div>
+                      <div>Standard Deviation:</div>
+                      <div className="text-right font-medium">{stdDev.toFixed(2)}</div>
+                      <div>Coefficient of Variation:</div>
+                      <div className="text-right font-medium">{((stdDev / mean) * 100).toFixed(2)}%</div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Quartiles</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Q1 (25%):</div>
+                      <div className="text-right font-medium">{q1.toFixed(2)}</div>
+                      <div>Q2 (50%):</div>
+                      <div className="text-right font-medium">{median.toFixed(2)}</div>
+                      <div>Q3 (75%):</div>
+                      <div className="text-right font-medium">{q3.toFixed(2)}</div>
+                      <div>IQR:</div>
+                      <div className="text-right font-medium">{(q3 - q1).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h4 className="text-sm font-medium mb-2">Distribution Shape</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Skewness:</div>
+                      <div className="text-right font-medium">
+                        {mean > median
+                          ? "Positive (right-skewed)"
+                          : mean < median
+                            ? "Negative (left-skewed)"
+                            : "Symmetric"}
+                      </div>
+                      <div>Mean - Median:</div>
+                      <div className="text-right font-medium">{(mean - median).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="aspect-[16/9] bg-card rounded-md flex items-center justify-center">
+                <div className="w-full max-w-md p-4">
+                  <h4 className="text-center font-medium mb-4">Five-Number Summary</h4>
+                  <div className="relative h-16 bg-muted rounded-md">
+                    {/* Box plot visualization */}
+                    <div className="absolute top-0 left-0 w-full h-4 flex items-center justify-center">
+                      <div className="absolute h-0.5 bg-gray-400 w-full"></div>
+
+                      {/* Min */}
+                      <div
+                        className="absolute h-4 w-0.5 bg-gray-600"
+                        style={{ left: `${((min - min) / (max - min)) * 100}%` }}
+                      ></div>
+
+                      {/* Q1 */}
+                      <div
+                        className="absolute h-4 w-0.5 bg-gray-600"
+                        style={{ left: `${((q1 - min) / (max - min)) * 100}%` }}
+                      ></div>
+
+                      {/* Box from Q1 to Q3 */}
+                      <div
+                        className="absolute h-4 bg-blue-200 border border-blue-400"
+                        style={{
+                          left: `${((q1 - min) / (max - min)) * 100}%`,
+                          width: `${((q3 - q1) / (max - min)) * 100}%`,
+                        }}
+                      ></div>
+
+                      {/* Median */}
+                      <div
+                        className="absolute h-4 w-0.5 bg-blue-600"
+                        style={{ left: `${((median - min) / (max - min)) * 100}%` }}
+                      ></div>
+
+                      {/* Q3 */}
+                      <div
+                        className="absolute h-4 w-0.5 bg-gray-600"
+                        style={{ left: `${((q3 - min) / (max - min)) * 100}%` }}
+                      ></div>
+
+                      {/* Max */}
+                      <div
+                        className="absolute h-4 w-0.5 bg-gray-600"
+                        style={{ left: `${((max - min) / (max - min)) * 100}%` }}
+                      ></div>
+                    </div>
+
+                    {/* Labels */}
+                    <div className="absolute top-6 left-0 w-full flex justify-between text-xs text-gray-500">
+                      <div className="transform -translate-x-1/2">Min: {min.toFixed(1)}</div>
+                      <div
+                        className="transform -translate-x-1/2"
+                        style={{ left: `${((q1 - min) / (max - min)) * 100}%` }}
+                      >
+                        Q1: {q1.toFixed(1)}
+                      </div>
+                      <div
+                        className="transform -translate-x-1/2"
+                        style={{ left: `${((median - min) / (max - min)) * 100}%` }}
+                      >
+                        Median: {median.toFixed(1)}
+                      </div>
+                      <div
+                        className="transform -translate-x-1/2"
+                        style={{ left: `${((q3 - min) / (max - min)) * 100}%` }}
+                      >
+                        Q3: {q3.toFixed(1)}
+                      </div>
+                      <div className="transform -translate-x-1/2">Max: {max.toFixed(1)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </Card>
+
+        {/* Controls sidebar */}
+        <Card className="p-6 w-full md:w-80">
+          <h3 className="font-medium mb-4">Controls</h3>
+
+          <div className="space-y-6">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Distribution Type</label>
+              <Select value={selectedDataset} onValueChange={setSelectedDataset}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select distribution" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">Normal Distribution</SelectItem>
+                  <SelectItem value="rightSkewed">Right-Skewed Distribution</SelectItem>
+                  <SelectItem value="leftSkewed">Left-Skewed Distribution</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {selectedDataset === "normal"
+                  ? "A symmetric bell-shaped distribution with most values clustered around the mean."
+                  : selectedDataset === "rightSkewed"
+                    ? "A distribution with a long tail to the right, where mean > median."
+                    : "A distribution with a long tail to the left, where mean < median."}
+              </p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Mean</label>
+              <div className="flex items-center gap-4">
+                <Slider
+                  value={[userMean]}
+                  min={10}
+                  max={90}
+                  step={1}
+                  className="flex-1"
+                  onValueChange={(value) => setUserMean(value[0])}
+                />
+                <span className="text-sm w-8 text-right">{userMean}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Actual calculated mean: {mean.toFixed(2)}</p>
+            </div>
+
+            {selectedDataset === "normal" ? (
+              <div>
+                <label className="text-sm font-medium mb-2 block">Standard Deviation</label>
+                <div className="flex items-center gap-4">
+                  <Slider
+                    value={[userStdDev]}
+                    min={1}
+                    max={20}
+                    step={1}
+                    className="flex-1"
+                    onValueChange={(value) => setUserStdDev(value[0])}
+                  />
+                  <span className="text-sm w-8 text-right">{userStdDev}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Actual calculated std dev: {stdDev.toFixed(2)}</p>
+              </div>
+            ) : (
+              <div>
+                <label className="text-sm font-medium mb-2 block">Skewness</label>
+                <div className="flex items-center gap-4">
+                  <Slider
+                    value={[userSkewness]}
+                    min={1}
+                    max={5}
+                    step={0.1}
+                    className="flex-1"
+                    onValueChange={(value) => setUserSkewness(value[0])}
+                  />
+                  <span className="text-sm w-8 text-right">{userSkewness.toFixed(1)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Mean - Median: {(mean - median).toFixed(2)}</p>
+              </div>
+            )}
+
+            <div className="pt-4">
+              <h4 className="text-sm font-medium mb-2">Summary Statistics</h4>
+              <div className="bg-muted p-3 rounded-md">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>Mean:</div>
+                  <div className="text-right font-medium">{mean.toFixed(2)}</div>
+                  <div>Median:</div>
+                  <div className="text-right font-medium">{median.toFixed(2)}</div>
+                  <div>Std Dev:</div>
+                  <div className="text-right font-medium">{stdDev.toFixed(2)}</div>
+                  <div>Variance:</div>
+                  <div className="text-right font-medium">{variance.toFixed(2)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Explanation section */}
+      <Card className="p-6">
+        <h3 className="font-medium mb-4">Explanation</h3>
+        <p className="text-muted-foreground mb-4">
+          This demo visualizes how statistical measures like mean, median, standard deviation, and variance relate to
+          data distributions. By adjusting the parameters, you can see how these statistics change and affect the shape
+          of the distribution.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Key Observations</h4>
+            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+              <li>In a normal distribution, the mean and median are approximately equal</li>
+              <li>In a right-skewed distribution, the mean is greater than the median</li>
+              <li>In a left-skewed distribution, the mean is less than the median</li>
+              <li>Standard deviation controls the spread of the distribution</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium mb-2">Tips</h4>
+            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+              <li>Increase the standard deviation to see a wider spread of values</li>
+              <li>Compare the mean and median to identify skewness in the data</li>
+              <li>Use the animation feature to see how changing parameters affects the distribution</li>
+              <li>Switch between distribution types to understand different data patterns</li>
+            </ul>
+          </div>
+        </div>
+      </Card>
+
+      {/* Video section */}
+      <Card className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-medium">Video Tutorial</h3>
+          <Button variant="outline" size="sm" onClick={() => setShowVideo(!showVideo)}>
+            {showVideo ? "Hide Video" : "Show Video"}
+          </Button>
+        </div>
+
+        {showVideo ? (
+          <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+            <p className="text-muted-foreground">
+              Add your YouTube video embed here. Replace this placeholder with an iframe element.
+            </p>
+            {/* Example YouTube embed (uncomment and replace with your video ID)
+            <iframe 
+              className="w-full h-full rounded-md"
+              src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+              title="Statistical Measures Tutorial"
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen
+            ></iframe>
+            */}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">
+            Click "Show Video" to view a tutorial on statistical measures and their impact on data distributions.
+          </p>
+        )}
+      </Card>
     </div>
   )
 }
