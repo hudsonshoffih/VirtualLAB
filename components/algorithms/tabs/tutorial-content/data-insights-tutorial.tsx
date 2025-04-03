@@ -555,7 +555,9 @@ print("Standard Deviation:", np.std(data))`}
             </div>
             <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
               <p className="text-sm font-medium mb-2">Output:</p>
-              <pre className="text-sm">Variance: 83.95061728395062 Standard Deviation: 9.162677749554563</pre>
+              <pre className="text-sm">{`Simple Mean: 10.123
+Sample Mean Std: 2.456
+Expected Mean: 9.876`}</pre>
               <p className="text-sm text-muted-foreground mt-2">
                 The variance (83.95) represents the average squared deviation from the mean. The standard deviation
                 (9.16) is the square root of variance and represents the average distance of data points from the mean.
@@ -660,7 +662,9 @@ print("IQR with Outlier:", iqr)`}
             <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
               <p className="text-sm font-medium mb-2">Output:</p>
               <pre className="text-sm">
-                Original Standard Deviation: 9.162677749554563 SD with Outlier: 49.76023992959001 IQR with Outlier: 15.0
+              {`Original Standard Deviation: 9.162677749554563
+SD with Outlier: 49.76023992959001
+Interquartile Range with Outlier: 15.0`}
               </pre>
               <p className="text-sm text-muted-foreground mt-2">
                 Notice how the standard deviation increases dramatically from 9.16 to 49.76 when an outlier is added,
