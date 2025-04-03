@@ -27,6 +27,7 @@ import {
   Workflow,
   Settings,
   GitMerge,
+  Briefcase,
 } from "lucide-react";
 
 export const getTutorialSections = (algorithmSlug: string) => {
@@ -113,7 +114,17 @@ export const getTutorialSections = (algorithmSlug: string) => {
         { title: "Stacking", icon: GitMerge },
         { title: "Comparison & Best Practices", icon: CheckCircle2 },
       ];
-
+      case "kmeans":
+      return [
+        { title: "Introduction to K-Means", icon: Target },
+        { title: "How K-Means Works", icon: Workflow },
+        { title: "Mathematical Concepts", icon: LineChart },
+        { title: "Choosing K Value", icon: BarChart },
+        { title: "Implementation", icon: Code },
+        { title: "Visualization", icon: PieChart },
+        { title: "Pros & Cons", icon: Layers },
+        { title: "Applications", icon: Briefcase },
+      ];
     default:
       return [
         { title: "Introduction", icon: FileText },

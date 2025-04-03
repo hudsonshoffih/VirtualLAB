@@ -18,6 +18,7 @@ import { KnnTutorial } from "./tutorial-content/knn-tutorial"
 import { RandomForestTutorial } from "./tutorial-content/random-forest-tutorial"
 import { SvmTutorial } from "./tutorial-content/svm-tutorial"
 import { EnsembleTutorial } from "./tutorial-content/ensemble-learning-tutorial"
+import { KMeansTutorial } from "./tutorial-content/kmeans-tutorial"
 
 
 interface TutorialTabProps {
@@ -68,6 +69,8 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <SvmTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "ensemble-models":
         return <EnsembleTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
+      case "kmeans":
+        return <KMeansTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       default:
         return (
           <div className="prose dark:prose-invert max-w-none">
