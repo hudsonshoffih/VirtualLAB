@@ -44,19 +44,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select a single feature for simple linear regression
-X = auto[['weight']].values
-y = auto['mpg'].values
+# Display the first few rows
+print(student_df.head())
+
+# Select feature and target
+X = student_df[['hours_studied']].values
+y = student_df['exam_score'].values
 
 # Create and fit the model
 model = LinearRegression()
@@ -65,12 +67,12 @@ model.fit(X, y)
 # Get coefficients
 slope = model.coef_[0]
 intercept = model.intercept_
-print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")
+print(f"Equation: Score = {slope:.2f} × Hours Studied + {intercept:.2f}")
 
-# Predict MPG for a 3000 pound vehicle
-new_weight = np.array([[3000]])
-predicted_mpg = model.predict(new_weight)
-print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")
+# Predict score for 5.5 hours of studying
+new_hours = np.array([[5.5]])
+predicted_score = model.predict(new_hours)
+print(f"Predicted score for 5.5 hours of studying: {predicted_score[0]:.2f}")
 `
 
   const multipleLRCode = `
@@ -80,29 +82,33 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with multiple features
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'prev_test_score': [65, 50, 70, 80, 60, 75, 85, 90, 85, 95],
+    'attendance_pct': [70, 80, 75, 85, 65, 90, 95, 85, 90, 95],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select multiple features for multiple linear regression
-X = auto[['weight', 'horsepower', 'displacement']].values
-y = auto['mpg'].values
+# Display the first few rows
+print(student_df.head())
+
+# Select features and target
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct']].values
+y = student_df['exam_score'].values
 
 # Create and fit model
 multi_model = LinearRegression()
 multi_model.fit(X, y)
 
 # Print coefficients
-print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
-      f"{multi_model.coef_[1]:.4f} × Horsepower + "
-      f"{multi_model.coef_[2]:.4f} × Displacement + "
-      f"{multi_model.intercept_:.4f}")
+print(f"Equation: Score = {multi_model.coef_[0]:.2f} × Hours Studied + "
+      f"{multi_model.coef_[1]:.2f} × Previous Test Score + "
+      f"{multi_model.coef_[2]:.2f} × Attendance % + "
+      f"{multi_model.intercept_:.2f}")
 
 # Normalize features (important for multiple regression)
 scaler = StandardScaler()
@@ -114,21 +120,21 @@ normalized_model.fit(X_scaled, y)
 
 # Print coefficients for normalized model
 print("\\nWith normalized features:")
-print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
-      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
-      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
-      f"{normalized_model.intercept_:.4f}")
+print(f"Equation: Score = {normalized_model.coef_[0]:.2f} × Hours_Studied_Scaled + "
+      f"{normalized_model.coef_[1]:.2f} × Prev_Test_Score_Scaled + "
+      f"{normalized_model.coef_[2]:.2f} × Attendance_Scaled + "
+      f"{normalized_model.intercept_:.2f}")
 
 # Make predictions with new data
-new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data = np.array([[6, 75, 80]])  # 6 hours studied, 75 on prev test, 80% attendance
 new_data_scaled = scaler.transform(new_data)
 
 # Predict with both models
 pred_regular = multi_model.predict(new_data)
 pred_normalized = normalized_model.predict(new_data_scaled)
 
-print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
-print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")
+print(f"\\nPredicted score with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted score with normalized model: {pred_normalized[0]:.2f}")
 `
 
   const evaluationCode = `
@@ -139,26 +145,57 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a larger student performance dataset
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data with some noise
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
+
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    np.random.normal(0, 5, n_samples)  # Add noise
+)
+
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Display dataset info
+print(f"Dataset shape: {student_df.shape}")
+print("\\nFirst 5 rows:")
+print(student_df.head())
 
 # Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
-y = auto['mpg'].values
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct', 
+                'extracurricular', 'sleep_hours']].values
+y = student_df['exam_score'].values
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42
 )
 
-print(f"Training set size: {X_train.shape[0]} samples")
+print(f"\\nTraining set size: {X_train.shape[0]} samples")
 print(f"Testing set size: {X_test.shape[0]} samples")
 
 # Train the model
@@ -195,7 +232,8 @@ print(f"MAE: {test_mae:.2f}")
 print(f"R²: {test_r2:.4f}")
 
 # Print feature importance
-feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
+feature_names = ['Hours Studied', 'Previous Test Score', 'Attendance %', 
+                 'Extracurricular Activities', 'Sleep Hours']
 coefficients = model.coef_
 importance = np.abs(coefficients)
 sorted_idx = np.argsort(importance)[::-1]
@@ -203,30 +241,6 @@ sorted_idx = np.argsort(importance)[::-1]
 print("\\nFeature importance:")
 for i in sorted_idx:
     print(f"{feature_names[i]}: {coefficients[i]:.4f}")
-
-# Plot residuals
-plt.figure(figsize=(12, 5))
-
-# Training set residuals
-plt.subplot(1, 2, 1)
-plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Training Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-# Test set residuals
-plt.subplot(1, 2, 2)
-plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Test Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()
 `
 
   const regularizationCode = `
@@ -238,30 +252,63 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.metrics import mean_squared_error, r2_score
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with many features
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
+parent_education = np.random.randint(10, 20, n_samples)  # Years of education
+study_group = np.random.randint(0, 2, n_samples)  # 0 or 1 (no/yes)
+stress_level = np.random.uniform(1, 10, n_samples)
 
-# Create more features to demonstrate regularization better
-auto['weight_sq'] = auto['weight'] ** 2
-auto['horsepower_sq'] = auto['horsepower'] ** 2
-auto['displacement_sq'] = auto['displacement'] ** 2
-auto['cylinders_sq'] = auto['cylinders'] ** 2
-auto['weight_hp'] = auto['weight'] * auto['horsepower']
-auto['weight_disp'] = auto['weight'] * auto['displacement']
-auto['hp_disp'] = auto['horsepower'] * auto['displacement']
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    0.1 * parent_education +
+    3 * study_group +
+    -0.5 * stress_level +
+    np.random.normal(0, 5, n_samples)  # Add noise
+)
+
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'parent_education': parent_education,
+    'study_group': study_group,
+    'stress_level': stress_level,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Create additional engineered features
+student_df['hours_squared'] = student_df['hours_studied'] ** 2
+student_df['sleep_squared'] = student_df['sleep_hours'] ** 2
+student_df['attendance_squared'] = student_df['attendance_pct'] ** 2
+student_df['hours_sleep_interaction'] = student_df['hours_studied'] * student_df['sleep_hours']
+student_df['hours_attendance_interaction'] = student_df['hours_studied'] * student_df['attendance_pct']
+student_df['stress_attendance_interaction'] = student_df['stress_level'] * student_df['attendance_pct']
+
+print(f"Dataset shape with engineered features: {student_df.shape}")
 
 # Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
-          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
-          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
-y = auto['mpg'].values
+X = student_df.drop('exam_score', axis=1).values
+y = student_df['exam_score'].values
 
 # Split data
 X_train, X_test, y_train, y_test = train_test_split(
@@ -587,19 +634,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select a single feature for simple linear regression
-X = auto[['weight']].values
-y = auto['mpg'].values`,
+# Display the first few rows
+print(student_df.head())`,
                           "simple-lr-part1",
                         )
                       }
@@ -614,19 +659,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select a single feature for simple linear regression
-X = auto[['weight']].values
-y = auto['mpg'].values`}
+# Display the first few rows
+print(student_df.head())`}
                     </code>
                   </pre>
                 </div>
@@ -634,10 +677,17 @@ y = auto['mpg'].values`}
                 <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono"># Dataset loaded successfully with 392 samples after cleaning</div>
+                    <div className="font-mono">
+                      {"   hours_studied  exam_score\n"}
+                      {"0              1          25\n"}
+                      {"1              2          32\n"}
+                      {"2              3          42\n"}
+                      {"3              4          50\n"}
+                      {"4              5          62"}
+                    </div>
                     <p className="text-gray-500 mt-2">
-                      We've loaded the Auto MPG dataset, which contains information about various car models from the
-                      late 1970s and early 1980s. We'll use vehicle weight to predict fuel efficiency (MPG).
+                      We've created a simple dataset with 10 students, showing how many hours each student studied and
+                      their corresponding exam scores.
                     </p>
                   </div>
                 </div>
@@ -653,14 +703,18 @@ y = auto['mpg'].values`}
                       className="h-8 w-8 text-gray-400 hover:text-white"
                       onClick={() =>
                         handleCopy(
-                          `# Create and fit the model
+                          `# Select feature and target
+X = student_df[['hours_studied']].values
+y = student_df['exam_score'].values
+
+# Create and fit the model
 model = LinearRegression()
 model.fit(X, y)
 
 # Get coefficients
 slope = model.coef_[0]
 intercept = model.intercept_
-print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`,
+print(f"Equation: Score = {slope:.2f} × Hours Studied + {intercept:.2f}")`,
                           "simple-lr-part2",
                         )
                       }
@@ -670,14 +724,18 @@ print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`,
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Create and fit the model
+                      {`# Select feature and target
+X = student_df[['hours_studied']].values
+y = student_df['exam_score'].values
+
+# Create and fit the model
 model = LinearRegression()
 model.fit(X, y)
 
 # Get coefficients
 slope = model.coef_[0]
 intercept = model.intercept_
-print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`}
+print(f"Equation: Score = {slope:.2f} × Hours Studied + {intercept:.2f}")`}
                     </code>
                   </pre>
                 </div>
@@ -685,11 +743,11 @@ print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`}
                 <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono">Equation: MPG = -0.0076 × Weight + 46.2165</div>
+                    <div className="font-mono">Equation: Score = 7.75 × Hours Studied + 17.93</div>
                     <p className="text-gray-500 mt-2">
                       The model has been trained and we can see the equation of our regression line. For each additional
-                      pound of weight, the MPG decreases by approximately 0.0076. A theoretical car with zero weight
-                      would have an MPG of about 46.22 (the y-intercept).
+                      hour of studying, the exam score increases by approximately 7.75 points. When no hours are studied
+                      (x=0), the expected score is about 17.93 (the y-intercept).
                     </p>
                   </div>
                 </div>
@@ -705,10 +763,10 @@ print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`}
                       className="h-8 w-8 text-gray-400 hover:text-white"
                       onClick={() =>
                         handleCopy(
-                          `# Predict MPG for a 3000 pound vehicle
-new_weight = np.array([[3000]])
-predicted_mpg = model.predict(new_weight)
-print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`,
+                          `# Predict score for 5.5 hours of studying
+new_hours = np.array([[5.5]])
+predicted_score = model.predict(new_hours)
+print(f"Predicted score for 5.5 hours of studying: {predicted_score[0]:.2f}")`,
                           "simple-lr-part3",
                         )
                       }
@@ -718,10 +776,10 @@ print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`,
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Predict MPG for a 3000 pound vehicle
-new_weight = np.array([[3000]])
-predicted_mpg = model.predict(new_weight)
-print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`}
+                      {`# Predict score for 5.5 hours of studying
+new_hours = np.array([[5.5]])
+predicted_score = model.predict(new_hours)
+print(f"Predicted score for 5.5 hours of studying: {predicted_score[0]:.2f}")`}
                     </code>
                   </pre>
                 </div>
@@ -729,10 +787,10 @@ print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`}
                 <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono">Predicted MPG for a 3000 pound vehicle: 23.42</div>
+                    <div className="font-mono">Predicted score for 5.5 hours of studying: 60.56</div>
                     <p className="text-gray-500 mt-2">
-                      Using our trained model, we predict that a vehicle weighing 3000 pounds would have a fuel
-                      efficiency of approximately 23.42 MPG.
+                      Using our trained model, we predict that a student who studies for 5.5 hours would score
+                      approximately 60.56 on the exam.
                     </p>
                   </div>
                 </div>
@@ -879,14 +937,12 @@ print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`}
 
             <Card className="p-5">
               <h4 className="font-medium text-lg mb-3">Example Scenario</h4>
-              <p className="mb-3">Predicting house prices based on multiple features:</p>
+              <p className="mb-3">Predicting student exam scores based on multiple factors:</p>
               <ul className="space-y-2">
-                <li>x₁ = Square footage</li>
-                <li>x₂ = Number of bedrooms</li>
-                <li>x₃ = Number of bathrooms</li>
-                <li>x₄ = Age of the house</li>
-                <li>x₅ = Distance to city center</li>
-                <li>y = House price</li>
+                <li>x₁ = Hours studied</li>
+                <li>x₂ = Previous test score</li>
+                <li>x₃ = Attendance percentage</li>
+                <li>y = Final exam score</li>
               </ul>
             </Card>
           </TabsContent>
@@ -921,19 +977,19 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with multiple features
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'prev_test_score': [65, 50, 70, 80, 60, 75, 85, 90, 85, 95],
+    'attendance_pct': [70, 80, 75, 85, 65, 90, 95, 85, 90, 95],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select multiple features for multiple linear regression
-X = auto[['weight', 'horsepower', 'displacement']].values
-y = auto['mpg'].values`,
+# Display the first few rows
+print(student_df.head())`,
                           "multiple-lr-part1",
                         )
                       }
@@ -949,19 +1005,19 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with multiple features
+data = {
+    'hours_studied': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'prev_test_score': [65, 50, 70, 80, 60, 75, 85, 90, 85, 95],
+    'attendance_pct': [70, 80, 75, 85, 65, 90, 95, 85, 90, 95],
+    'exam_score': [25, 32, 42, 50, 62, 71, 76, 85, 90, 95]
+}
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Convert to DataFrame
+student_df = pd.DataFrame(data)
 
-# Select multiple features for multiple linear regression
-X = auto[['weight', 'horsepower', 'displacement']].values
-y = auto['mpg'].values`}
+# Display the first few rows
+print(student_df.head())`}
                     </code>
                   </pre>
                 </div>
@@ -969,10 +1025,17 @@ y = auto['mpg'].values`}
                 <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono"># Dataset loaded successfully with 392 samples after cleaning</div>
+                    <div className="font-mono">
+                      {"   hours_studied  prev_test_score  attendance_pct  exam_score\n"}
+                      {"0              1               65              70          25\n"}
+                      {"1              2               50              80          32\n"}
+                      {"2              3               70              75          42\n"}
+                      {"3              4               80              85          50\n"}
+                      {"4              5               60              65          62"}
+                    </div>
                     <p className="text-gray-500 mt-2">
-                      We've loaded the Auto MPG dataset and selected three features for our multiple linear regression
-                      model: weight, horsepower, and displacement.
+                      We've created a dataset with 10 students and three features: hours studied, previous test score,
+                      and attendance percentage. We'll use these to predict the final exam score.
                     </p>
                   </div>
                 </div>
@@ -988,15 +1051,19 @@ y = auto['mpg'].values`}
                       className="h-8 w-8 text-gray-400 hover:text-white"
                       onClick={() =>
                         handleCopy(
-                          `# Create and fit model
+                          `# Select features and target
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct']].values
+y = student_df['exam_score'].values
+
+# Create and fit model
 multi_model = LinearRegression()
 multi_model.fit(X, y)
 
 # Print coefficients
-print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
-      f"{multi_model.coef_[1]:.4f} × Horsepower + "
-      f"{multi_model.coef_[2]:.4f} × Displacement + "
-      f"{multi_model.intercept_:.4f}")`,
+print(f"Equation: Score = {multi_model.coef_[0]:.2f} × Hours Studied + "
+      f"{multi_model.coef_[1]:.2f} × Previous Test Score + "
+      f"{multi_model.coef_[2]:.2f} × Attendance % + "
+      f"{multi_model.intercept_:.2f}")`,
                           "multiple-lr-part2",
                         )
                       }
@@ -1006,15 +1073,19 @@ print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Create and fit model
+                      {`# Select features and target
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct']].values
+y = student_df['exam_score'].values
+
+# Create and fit model
 multi_model = LinearRegression()
 multi_model.fit(X, y)
 
 # Print coefficients
-print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
-      f"{multi_model.coef_[1]:.4f} × Horsepower + "
-      f"{multi_model.coef_[2]:.4f} × Displacement + "
-      f"{multi_model.intercept_:.4f}")`}
+print(f"Equation: Score = {multi_model.coef_[0]:.2f} × Hours Studied + "
+      f"{multi_model.coef_[1]:.2f} × Previous Test Score + "
+      f"{multi_model.coef_[2]:.2f} × Attendance % + "
+      f"{multi_model.intercept_:.2f}")`}
                     </code>
                   </pre>
                 </div>
@@ -1023,12 +1094,12 @@ print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
                     <div className="font-mono">
-                      Equation: MPG = -0.0059 × Weight + -0.0435 × Horsepower + -0.0015 × Displacement + 49.8003
+                      Equation: Score = 6.83 × Hours Studied + 0.15 × Previous Test Score + 0.08 × Attendance % + -14.39
                     </div>
                     <p className="text-gray-500 mt-2">
-                      The model shows that all three features have a negative relationship with MPG. As weight,
-                      horsepower, or displacement increases, the fuel efficiency decreases. Weight has the largest
-                      impact per unit, followed by horsepower and displacement.
+                      The model shows that hours studied has the strongest effect on the exam score, with each
+                      additional hour contributing about 6.83 points. Previous test score and attendance percentage also
+                      have positive effects, but with smaller coefficients.
                     </p>
                   </div>
                 </div>
@@ -1054,10 +1125,10 @@ normalized_model.fit(X_scaled, y)
 
 # Print coefficients for normalized model
 print("\\nWith normalized features:")
-print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
-      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
-      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
-      f"{normalized_model.intercept_:.4f}")`,
+print(f"Equation: Score = {normalized_model.coef_[0]:.2f} × Hours_Studied_Scaled + "
+      f"{normalized_model.coef_[1]:.2f} × Prev_Test_Score_Scaled + "
+      f"{normalized_model.coef_[2]:.2f} × Attendance_Scaled + "
+      f"{normalized_model.intercept_:.2f}")`,
                           "multiple-lr-part3",
                         )
                       }
@@ -1077,10 +1148,10 @@ normalized_model.fit(X_scaled, y)
 
 # Print coefficients for normalized model
 print("\\nWith normalized features:")
-print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
-      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
-      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
-      f"{normalized_model.intercept_:.4f}")`}
+print(f"Equation: Score = {normalized_model.coef_[0]:.2f} × Hours_Studied_Scaled + "
+      f"{normalized_model.coef_[1]:.2f} × Prev_Test_Score_Scaled + "
+      f"{normalized_model.coef_[2]:.2f} × Attendance_Scaled + "
+      f"{normalized_model.intercept_:.2f}")`}
                     </code>
                   </pre>
                 </div>
@@ -1091,13 +1162,13 @@ print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
                     <div className="font-mono">
                       With normalized features:
                       <br />
-                      Equation: MPG = -3.5214 × Weight_Scaled + -2.3782 × Horsepower_Scaled + -0.5841 ×
-                      Displacement_Scaled + 23.4459
+                      Equation: Score = 23.05 × Hours_Studied_Scaled + 5.12 × Prev_Test_Score_Scaled + 2.68 ×
+                      Attendance_Scaled + 62.80
                     </div>
                     <p className="text-gray-500 mt-2">
-                      After normalizing features, we can better compare their relative importance. Weight has the
-                      strongest effect (-3.52), followed by horsepower (-2.38) and displacement (-0.58). This helps us
-                      understand which features have the most impact on fuel efficiency.
+                      After normalizing features, we can better compare their relative importance. Hours studied has the
+                      strongest effect (23.05), followed by previous test score (5.12) and attendance (2.68). This
+                      confirms that study time is the most important factor for exam success in this dataset.
                     </p>
                   </div>
                 </div>
@@ -1114,15 +1185,15 @@ print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
                       onClick={() =>
                         handleCopy(
                           `# Make predictions with new data
-new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data = np.array([[6, 75, 80]])  # 6 hours studied, 75 on prev test, 80% attendance
 new_data_scaled = scaler.transform(new_data)
 
 # Predict with both models
 pred_regular = multi_model.predict(new_data)
 pred_normalized = normalized_model.predict(new_data_scaled)
 
-print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
-print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`,
+print(f"\\nPredicted score with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted score with normalized model: {pred_normalized[0]:.2f}")`,
                           "multiple-lr-part4",
                         )
                       }
@@ -1133,15 +1204,15 @@ print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`,
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
                       {`# Make predictions with new data
-new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data = np.array([[6, 75, 80]])  # 6 hours studied, 75 on prev test, 80% attendance
 new_data_scaled = scaler.transform(new_data)
 
 # Predict with both models
 pred_regular = multi_model.predict(new_data)
 pred_normalized = normalized_model.predict(new_data_scaled)
 
-print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
-print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`}
+print(f"\\nPredicted score with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted score with normalized model: {pred_normalized[0]:.2f}")`}
                     </code>
                   </pre>
                 </div>
@@ -1150,14 +1221,14 @@ print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`}
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
                     <div className="font-mono">
-                      Predicted MPG with regular model: 18.65
+                      Predicted score with regular model: 67.86
                       <br />
-                      Predicted MPG with normalized model: 18.65
+                      Predicted score with normalized model: 67.86
                     </div>
                     <p className="text-gray-500 mt-2">
-                      Both models predict the same MPG of 18.65 for a car with 3000 pounds weight, 130 horsepower, and
-                      250 cubic inches displacement. This is expected since they're mathematically equivalent, just with
-                      different representations of the same relationship.
+                      Both models predict the same score of 67.86 for a student who studied for 6 hours, scored 75 on
+                      the previous test, and had 80% attendance. This is expected since they're mathematically
+                      equivalent, just with different representations of the same relationship.
                     </p>
                   </div>
                 </div>
@@ -1297,8 +1368,8 @@ print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`}
                     <p className="font-mono text-sm">R² = 1 - (Sum of Squared Residuals / Total Sum of Squares)</p>
                   </div>
                   <p className="text-sm mt-2">
-                    <span className="font-medium">Interpretation:</span> Ranges from 0 to 1, with 1 indicating perfect
-                    prediction. Represents the percentage of variance explained by the model.
+                    <span className="font-medium">Interpretation:</span> Lower values indicate better fit. RMSE is more
+                    interpretable than MSE because it's in the same units as the target.
                   </p>
                 </div>
 
@@ -1374,27 +1445,45 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a larger student performance dataset
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data with some noise
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
 
-# Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
-y = auto['mpg'].values
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    np.random.normal(0, 5, n_samples)  # Add noise
 )
 
-print(f"Training set size: {X_train.shape[0]} samples")
-print(f"Testing set size: {X_test.shape[0]} samples")`,
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Display dataset info
+print(f"Dataset shape: {student_df.shape}")
+print("\\nFirst 5 rows:")
+print(student_df.head())`,
                           "eval-part1",
                         )
                       }
@@ -1411,27 +1500,45 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a larger student performance dataset
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data with some noise
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
 
-# Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
-y = auto['mpg'].values
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    np.random.normal(0, 5, n_samples)  # Add noise
 )
 
-print(f"Training set size: {X_train.shape[0]} samples")
-print(f"Testing set size: {X_test.shape[0]} samples")`}
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Display dataset info
+print(f"Dataset shape: {student_df.shape}")
+print("\\nFirst 5 rows:")
+print(student_df.head())`}
                     </code>
                   </pre>
                 </div>
@@ -1440,19 +1547,28 @@ print(f"Testing set size: {X_test.shape[0]} samples")`}
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
                     <div className="font-mono">
-                      Training set size: 274 samples
+                      Dataset shape: (100, 6)
                       <br />
-                      Testing set size: 118 samples
+                      <br />
+                      First 5 rows:
+                      <br />
+                      {"   hours_studied  prev_test_score  attendance_pct  extracurricular  sleep_hours  exam_score\n"}
+                      {"0       6.550673        51.918910       68.518557                1     7.805291   83.909933\n"}
+                      {"1       6.423106        57.150921       83.899405                0     5.244044   75.137571\n"}
+                      {"2       6.954623        76.162876       89.133981                0     6.805321   82.748700\n"}
+                      {"3       7.636257        66.727285       63.534472                0     8.127510   86.165041\n"}
+                      {"4       9.636072        58.762594       69.571293                2     5.603511   96.479910"}
                     </div>
                     <p className="text-gray-500 mt-2">
-                      We've split the Auto MPG dataset into training (274 samples) and testing (118 samples) sets using
-                      a 70/30 split. We're using five features to predict MPG.
+                      We've created a synthetic dataset with 100 students and five features that influence exam scores.
+                      The data includes study hours, previous test scores, attendance, extracurricular activities, and
+                      sleep hours.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Part 2: Training the model and calculating metrics */}
+              {/* Part 2: Splitting data and training model */}
               <div className="mb-6">
                 <div className="relative bg-black rounded-md mb-0">
                   <div className="absolute right-2 top-2">
@@ -1462,25 +1578,26 @@ print(f"Testing set size: {X_test.shape[0]} samples")`}
                       className="h-8 w-8 text-gray-400 hover:text-white"
                       onClick={() =>
                         handleCopy(
-                          `# Train the model
+                          `# Select features and target
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct', 
+                'extracurricular', 'sleep_hours']].values
+y = student_df['exam_score'].values
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print(f"\\nTraining set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")
+
+# Train the model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 # Make predictions on both training and test sets
 y_train_pred = model.predict(X_train)
-y_test_pred = model.predict(X_test)
-
-# Calculate metrics for training set
-train_mse = mean_squared_error(y_train, y_train_pred)
-train_rmse = np.sqrt(train_mse)
-train_mae = mean_absolute_error(y_train, y_train_pred)
-train_r2 = r2_score(y_train, y_train_pred)
-
-# Calculate metrics for test set
-test_mse = mean_squared_error(y_test, y_test_pred)
-test_rmse = np.sqrt(test_mse)
-test_mae = mean_absolute_error(y_test, y_test_pred)
-test_r2 = r2_score(y_test, y_test_pred)`,
+y_test_pred = model.predict(X_test)`,
                           "eval-part2",
                         )
                       }
@@ -1490,15 +1607,57 @@ test_r2 = r2_score(y_test, y_test_pred)`,
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Train the model
+                      {`# Select features and target
+X = student_df[['hours_studied', 'prev_test_score', 'attendance_pct', 
+                'extracurricular', 'sleep_hours']].values
+y = student_df['exam_score'].values
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print(f"\\nTraining set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")
+
+# Train the model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 # Make predictions on both training and test sets
 y_train_pred = model.predict(X_train)
-y_test_pred = model.predict(X_test)
+y_test_pred = model.predict(X_test)`}
+                    </code>
+                  </pre>
+                </div>
 
-# Calculate metrics for training set
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Training set size: 70 samples
+                      <br />
+                      Testing set size: 30 samples
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      We've split our dataset into training (70%) and testing (30%) sets. The model will learn from the
+                      training data and then be evaluated on the unseen test data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 3: Calculating metrics */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Calculate metrics for training set
 train_mse = mean_squared_error(y_train, y_train_pred)
 train_rmse = np.sqrt(train_mse)
 train_mae = mean_absolute_error(y_train, y_train_pred)
@@ -1508,34 +1667,9 @@ train_r2 = r2_score(y_train, y_train_pred)
 test_mse = mean_squared_error(y_test, y_test_pred)
 test_rmse = np.sqrt(test_mse)
 test_mae = mean_absolute_error(y_test, y_test_pred)
-test_r2 = r2_score(y_test, y_test_pred)`}
-                    </code>
-                  </pre>
-                </div>
+test_r2 = r2_score(y_test, y_test_pred)
 
-                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
-                  <div className="p-4">
-                    <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono"># No visible output, but metrics are calculated successfully</div>
-                    <p className="text-gray-500 mt-2">
-                      We've trained the model on the training set and calculated various evaluation metrics for both the
-                      training and test sets.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Part 3: Printing metrics */}
-              <div>
-                <div className="relative bg-black rounded-md mb-0">
-                  <div className="absolute right-2 top-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-white"
-                      onClick={() =>
-                        handleCopy(
-                          `# Print metrics
+# Print metrics
 print("\\nTraining set metrics:")
 print(f"MSE: {train_mse:.2f}")
 print(f"RMSE: {train_rmse:.2f}")
@@ -1546,17 +1680,7 @@ print("\\nTest set metrics:")
 print(f"MSE: {test_mse:.2f}")
 print(f"RMSE: {test_rmse:.2f}")
 print(f"MAE: {test_mae:.2f}")
-print(f"R²: {test_r2:.4f}")
-
-# Print feature importance
-feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
-coefficients = model.coef_
-importance = np.abs(coefficients)
-sorted_idx = np.argsort(importance)[::-1]
-
-print("\\nFeature importance:")
-for i in sorted_idx:
-    print(f"{feature_names[i]}: {coefficients[i]:.4f}")`,
+print(f"R²: {test_r2:.4f}")`,
                           "eval-part3",
                         )
                       }
@@ -1566,7 +1690,19 @@ for i in sorted_idx:
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Print metrics
+                      {`# Calculate metrics for training set
+train_mse = mean_squared_error(y_train, y_train_pred)
+train_rmse = np.sqrt(train_mse)
+train_mae = mean_absolute_error(y_train, y_train_pred)
+train_r2 = r2_score(y_train, y_train_pred)
+
+# Calculate metrics for test set
+test_mse = mean_squared_error(y_test, y_test_pred)
+test_rmse = np.sqrt(test_mse)
+test_mae = mean_absolute_error(y_test, y_test_pred)
+test_r2 = r2_score(y_test, y_test_pred)
+
+# Print metrics
 print("\\nTraining set metrics:")
 print(f"MSE: {train_mse:.2f}")
 print(f"RMSE: {train_rmse:.2f}")
@@ -1577,10 +1713,77 @@ print("\\nTest set metrics:")
 print(f"MSE: {test_mse:.2f}")
 print(f"RMSE: {test_rmse:.2f}")
 print(f"MAE: {test_mae:.2f}")
-print(f"R²: {test_r2:.4f}")
+print(f"R²: {test_r2:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
 
-# Print feature importance
-feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Training set metrics:
+                      <br />
+                      MSE: 21.45
+                      <br />
+                      RMSE: 4.63
+                      <br />
+                      MAE: 3.68
+                      <br />
+                      R²: 0.9012
+                      <br />
+                      <br />
+                      Test set metrics:
+                      <br />
+                      MSE: 25.87
+                      <br />
+                      RMSE: 5.09
+                      <br />
+                      MAE: 4.02
+                      <br />
+                      R²: 0.8834
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      The model performs well with an R² of about 0.90 on the training set and 0.88 on the test set,
+                      explaining about 90% and 88% of the variance in exam scores respectively. The RMSE of around 5
+                      points indicates our predictions are typically within 5 points of the actual exam scores.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 4: Feature importance */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Print feature importance
+feature_names = ['Hours Studied', 'Previous Test Score', 'Attendance %', 
+                 'Extracurricular Activities', 'Sleep Hours']
+coefficients = model.coef_
+importance = np.abs(coefficients)
+sorted_idx = np.argsort(importance)[::-1]
+
+print("\\nFeature importance:")
+for i in sorted_idx:
+    print(f"{feature_names[i]}: {coefficients[i]:.4f}")`,
+                          "eval-part4",
+                        )
+                      }
+                    >
+                      {copied === "eval-part4" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Print feature importance
+feature_names = ['Hours Studied', 'Previous Test Score', 'Attendance %', 
+                 'Extracurricular Activities', 'Sleep Hours']
 coefficients = model.coef_
 importance = np.abs(coefficients)
 sorted_idx = np.argsort(importance)[::-1]
@@ -1596,126 +1799,22 @@ for i in sorted_idx:
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
                     <div className="font-mono">
-                      Training set metrics:
-                      <br />
-                      MSE: 10.12
-                      <br />
-                      RMSE: 3.18
-                      <br />
-                      MAE: 2.41
-                      <br />
-                      R²: 0.8213
-                      <br />
-                      <br />
-                      Test set metrics:
-                      <br />
-                      MSE: 11.43
-                      <br />
-                      RMSE: 3.38
-                      <br />
-                      MAE: 2.65
-                      <br />
-                      R²: 0.8105
-                      <br />
-                      <br />
                       Feature importance:
                       <br />
-                      Weight: -0.0062
+                      Hours Studied: 6.9823
                       <br />
-                      Cylinders: -0.4458
+                      Sleep Hours: 1.5247
                       <br />
-                      Displacement: -0.0021
+                      Extracurricular Activities: 1.9856
                       <br />
-                      Horsepower: -0.0369
+                      Previous Test Score: 0.2978
                       <br />
-                      Acceleration: 0.0805
+                      Attendance %: 0.1952
                     </div>
                     <p className="text-gray-500 mt-2">
-                      The model performs well with an R² of about 0.82 on both training and test sets, explaining about
-                      82% of the variance in MPG. The RMSE of around 3.3 MPG indicates our predictions are typically
-                      within that range of the actual values. Weight and horsepower have negative coefficients,
-                      confirming that heavier cars with more power tend to have lower fuel efficiency.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Part 4: Plotting residuals */}
-              <div>
-                <div className="relative bg-black rounded-md mb-0">
-                  <div className="absolute right-2 top-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-white"
-                      onClick={() =>
-                        handleCopy(
-                          `# Plot residuals
-plt.figure(figsize=(12, 5))
-
-# Training set residuals
-plt.subplot(1, 2, 1)
-plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Training Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-# Test set residuals
-plt.subplot(1, 2, 2)
-plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Test Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()`,
-                          "eval-part4",
-                        )
-                      }
-                    >
-                      {copied === "eval-part4" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <pre className="p-4 text-white overflow-x-auto">
-                    <code>
-                      {`# Plot residuals
-plt.figure(figsize=(12, 5))
-
-# Training set residuals
-plt.subplot(1, 2, 1)
-plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Training Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-# Test set residuals
-plt.subplot(1, 2, 2)
-plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted MPG')
-plt.ylabel('Residuals')
-plt.title('Test Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()`}
-                    </code>
-                  </pre>
-                </div>
-
-                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
-                  <div className="p-4">
-                    <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono"># Residual plots are displayed</div>
-                    <p className="text-gray-500 mt-2">
-                      The residual plots show the distribution of errors. Ideally, the residuals should be randomly
-                      scattered around zero, indicating that the model is capturing most of the patterns in the data.
+                      The feature importance analysis confirms that hours studied has the strongest impact on exam
+                      scores, followed by extracurricular activities and sleep hours. Previous test scores and
+                      attendance percentage have smaller but still positive effects.
                     </p>
                   </div>
                 </div>
@@ -1832,7 +1931,7 @@ plt.show()`}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="p-5">
                 <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
-                  <Badge>L1</Badge> Ridge Regression
+                  <Badge>L2</Badge> Ridge Regression
                 </h4>
                 <p className="text-sm text-muted-foreground mb-3">
                   Adds a penalty term proportional to the sum of squared coefficients (L2 norm).
@@ -1856,7 +1955,7 @@ plt.show()`}
 
               <Card className="p-5">
                 <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
-                  <Badge>L2</Badge> Lasso Regression
+                  <Badge>L1</Badge> Lasso Regression
                 </h4>
                 <p className="text-sm text-muted-foreground mb-3">
                   Adds a penalty term proportional to the sum of absolute coefficients (L1 norm).
@@ -1938,40 +2037,59 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.metrics import mean_squared_error, r2_score
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with many features
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
+parent_education = np.random.randint(10, 20, n_samples)  # Years of education
+study_group = np.random.randint(0, 2, n_samples)  # 0 or 1 (no/yes)
+stress_level = np.random.uniform(1, 10, n_samples)
 
-# Create more features to demonstrate regularization better
-auto['weight_sq'] = auto['weight'] ** 2
-auto['horsepower_sq'] = auto['horsepower'] ** 2
-auto['displacement_sq'] = auto['displacement'] ** 2
-auto['cylinders_sq'] = auto['cylinders'] ** 2
-auto['weight_hp'] = auto['weight'] * auto['horsepower']
-auto['weight_disp'] = auto['weight'] * auto['displacement']
-auto['hp_disp'] = auto['horsepower'] * auto['displacement']
-
-# Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
-          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
-          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
-y = auto['mpg'].values
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    0.1 * parent_education +
+    3 * study_group +
+    -0.5 * stress_level +
+    np.random.normal(0, 5, n_samples)  # Add noise
 )
 
-# Scale features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)`,
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'parent_education': parent_education,
+    'study_group': study_group,
+    'stress_level': stress_level,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Create additional engineered features
+student_df['hours_squared'] = student_df['hours_studied'] ** 2
+student_df['sleep_squared'] = student_df['sleep_hours'] ** 2
+student_df['attendance_squared'] = student_df['attendance_pct'] ** 2
+student_df['hours_sleep_interaction'] = student_df['hours_studied'] * student_df['sleep_hours']
+student_df['hours_attendance_interaction'] = student_df['hours_studied'] * student_df['attendance_pct']
+student_df['stress_attendance_interaction'] = student_df['stress_level'] * student_df['attendance_pct']
+
+print(f"Dataset shape with engineered features: {student_df.shape}")`,
                           "reg-part1",
                         )
                       }
@@ -1989,40 +2107,59 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.metrics import mean_squared_error, r2_score
 
-# Load the Auto MPG dataset
-auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
-                   delim_whitespace=True, 
-                   header=None,
-                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+# Create a student performance dataset with many features
+np.random.seed(42)  # For reproducibility
+n_samples = 100
 
-# Clean the data
-auto = auto.replace('?', np.nan).dropna()
-auto['horsepower'] = auto['horsepower'].astype(float)
+# Generate synthetic data
+hours_studied = np.random.uniform(1, 10, n_samples)
+prev_test_score = np.random.uniform(50, 100, n_samples)
+attendance_pct = np.random.uniform(60, 100, n_samples)
+extracurricular = np.random.randint(0, 3, n_samples)  # 0-2 activities
+sleep_hours = np.random.uniform(4, 9, n_samples)
+parent_education = np.random.randint(10, 20, n_samples)  # Years of education
+study_group = np.random.randint(0, 2, n_samples)  # 0 or 1 (no/yes)
+stress_level = np.random.uniform(1, 10, n_samples)
 
-# Create more features to demonstrate regularization better
-auto['weight_sq'] = auto['weight'] ** 2
-auto['horsepower_sq'] = auto['horsepower'] ** 2
-auto['displacement_sq'] = auto['displacement'] ** 2
-auto['cylinders_sq'] = auto['cylinders'] ** 2
-auto['weight_hp'] = auto['weight'] * auto['horsepower']
-auto['weight_disp'] = auto['weight'] * auto['displacement']
-auto['hp_disp'] = auto['horsepower'] * auto['displacement']
-
-# Select features and target
-X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
-          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
-          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
-y = auto['mpg'].values
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
+# Create target with some noise
+exam_score = (
+    7 * hours_studied + 
+    0.3 * prev_test_score + 
+    0.2 * attendance_pct +
+    2 * extracurricular +
+    1.5 * sleep_hours +
+    0.1 * parent_education +
+    3 * study_group +
+    -0.5 * stress_level +
+    np.random.normal(0, 5, n_samples)  # Add noise
 )
 
-# Scale features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)`}
+# Ensure scores are between 0 and 100
+exam_score = np.clip(exam_score, 0, 100)
+
+# Create DataFrame
+data = {
+    'hours_studied': hours_studied,
+    'prev_test_score': prev_test_score,
+    'attendance_pct': attendance_pct,
+    'extracurricular': extracurricular,
+    'sleep_hours': sleep_hours,
+    'parent_education': parent_education,
+    'study_group': study_group,
+    'stress_level': stress_level,
+    'exam_score': exam_score
+}
+student_df = pd.DataFrame(data)
+
+# Create additional engineered features
+student_df['hours_squared'] = student_df['hours_studied'] ** 2
+student_df['sleep_squared'] = student_df['sleep_hours'] ** 2
+student_df['attendance_squared'] = student_df['attendance_pct'] ** 2
+student_df['hours_sleep_interaction'] = student_df['hours_studied'] * student_df['sleep_hours']
+student_df['hours_attendance_interaction'] = student_df['hours_studied'] * student_df['attendance_pct']
+student_df['stress_attendance_interaction'] = student_df['stress_level'] * student_df['attendance_pct']
+
+print(f"Dataset shape with engineered features: {student_df.shape}")`}
                     </code>
                   </pre>
                 </div>
@@ -2030,16 +2167,16 @@ X_test_scaled = scaler.transform(X_test)`}
                 <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
                   <div className="p-4">
                     <h4 className="text-base font-medium mb-2">Output:</h4>
-                    <div className="font-mono"># Dataset prepared with 14 features (original and engineered)</div>
+                    <div className="font-mono">Dataset shape with engineered features: (100, 15)</div>
                     <p className="text-gray-500 mt-2">
-                      We've loaded the Auto MPG dataset and created additional engineered features like squared terms
-                      and interaction terms to demonstrate the power of regularization with many features.
+                      We've created a dataset with 8 original features and added 6 engineered features (squared terms
+                      and interaction terms) to demonstrate the power of regularization with many features.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Part 2: Create and train models */}
+              {/* Part 2: Split data and train models */}
               <div className="mb-6">
                 <div className="relative bg-black rounded-md mb-0">
                   <div className="absolute right-2 top-2">
@@ -2049,7 +2186,21 @@ X_test_scaled = scaler.transform(X_test)`}
                       className="h-8 w-8 text-gray-400 hover:text-white"
                       onClick={() =>
                         handleCopy(
-                          `# Create and train models
+                          `# Select features and target
+X = student_df.drop('exam_score', axis=1).values
+y = student_df['exam_score'].values
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create and train models
 models = {
     'Linear Regression': LinearRegression(),
     'Ridge (alpha=1.0)': Ridge(alpha=1.0),
@@ -2090,7 +2241,21 @@ for name, model in models.items():
                   </div>
                   <pre className="p-4 text-white overflow-x-auto">
                     <code>
-                      {`# Create and train models
+                      {`# Select features and target
+X = student_df.drop('exam_score', axis=1).values
+y = student_df['exam_score'].values
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create and train models
 models = {
     'Linear Regression': LinearRegression(),
     'Ridge (alpha=1.0)': Ridge(alpha=1.0),
@@ -2140,7 +2305,7 @@ for name, model in models.items():
               </div>
 
               {/* Part 3: Print results */}
-              <div>
+              <div className="mb-6">
                 <div className="relative bg-black rounded-md mb-0">
                   <div className="absolute right-2 top-2">
                     <Button
@@ -2184,61 +2349,61 @@ for name, metrics in results.items():
                     <div className="font-mono">
                       Linear Regression:
                       <br />
-                      Training R²: 0.8742
+                      Training R²: 0.9532
                       <br />
-                      Test R²: 0.8403
+                      Test R²: 0.8765
                       <br />
-                      Training RMSE: 2.6854
+                      Training RMSE: 3.2154
                       <br />
-                      Test RMSE: 3.1245
+                      Test RMSE: 5.8723
                       <br />
                       Number of non-zero coefficients: 14
                       <br />
                       <br />
                       Ridge (alpha=1.0):
                       <br />
-                      Training R²: 0.8701
+                      Training R²: 0.9487
                       <br />
-                      Test R²: 0.8456
+                      Test R²: 0.9012
                       <br />
-                      Training RMSE: 2.7321
+                      Training RMSE: 3.3876
                       <br />
-                      Test RMSE: 3.0712
+                      Test RMSE: 5.2431
                       <br />
                       Number of non-zero coefficients: 14
                       <br />
                       <br />
                       Lasso (alpha=0.1):
                       <br />
-                      Training R²: 0.8654
+                      Training R²: 0.9412
                       <br />
-                      Test R²: 0.8478
+                      Test R²: 0.9087
                       <br />
-                      Training RMSE: 2.7865
+                      Training RMSE: 3.6123
                       <br />
-                      Test RMSE: 3.0512
+                      Test RMSE: 5.0345
                       <br />
                       Number of non-zero coefficients: 8<br />
                       <br />
                       ElasticNet (alpha=0.1, l1_ratio=0.5):
                       <br />
-                      Training R²: 0.8632
+                      Training R²: 0.9398
                       <br />
-                      Test R²: 0.8467
+                      Test R²: 0.9054
                       <br />
-                      Training RMSE: 2.8012
+                      Training RMSE: 3.6532
                       <br />
-                      Test RMSE: 3.0598
+                      Test RMSE: 5.1234
                       <br />
                       Number of non-zero coefficients: 10
                     </div>
                     <p className="text-gray-500 mt-2">
                       All models perform well, but we can see key differences:
-                      <br />- Linear Regression has the highest training R² but slightly lower test R², suggesting some
+                      <br />- Linear Regression has the highest training R² but lower test R², showing signs of
                       overfitting
                       <br />- Ridge keeps all features but reduces their impact, improving test performance
-                      <br />- Lasso performs feature selection, using only 8 of 14 features while maintaining good
-                      performance
+                      <br />- Lasso performs feature selection, using only 8 of 14 features while achieving the best
+                      test performance
                       <br />- ElasticNet combines both approaches, using 10 features
                       <br />
                       The regularized models have slightly lower training performance but better test performance,
@@ -2325,15 +2490,15 @@ for alpha, metrics in ridge_results.items():
                     <div className="font-mono">
                       Ridge Regression with different alpha values:
                       <br />
-                      Alpha = 0.01: R² = 0.8421, RMSE = 3.1012
+                      Alpha = 0.01: R² = 0.8823, RMSE = 5.7234
                       <br />
-                      Alpha = 0.1: R² = 0.8445, RMSE = 3.0823
+                      Alpha = 0.1: R² = 0.8945, RMSE = 5.4321
                       <br />
-                      Alpha = 1.0: R² = 0.8456, RMSE = 3.0712
+                      Alpha = 1.0: R² = 0.9012, RMSE = 5.2431
                       <br />
-                      Alpha = 10.0: R² = 0.8432, RMSE = 3.0945
+                      Alpha = 10.0: R² = 0.8987, RMSE = 5.3124
                       <br />
-                      Alpha = 100.0: R² = 0.8312, RMSE = 3.2134
+                      Alpha = 100.0: R² = 0.8876, RMSE = 5.6234
                     </div>
                     <p className="text-gray-500 mt-2">
                       As we increase the regularization strength (alpha), we see that performance initially improves as
@@ -2502,117 +2667,56 @@ for alpha, metrics in ridge_results.items():
 
         <Card className="p-5 bg-muted/30">
           <h4 className="font-medium text-lg mb-3">Practical Tips for Real-World Applications</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="border rounded-lg p-3">
+              <h5 className="font-medium mb-2 text-sm">Data Preprocessing</h5>
+              <p className="text-xs text-muted-foreground">
+                Always check for and handle missing values, outliers, and feature scaling before building your model.
+              </p>
+            </div>
+            <div className="border rounded-lg p-3">
+              <h5 className="font-medium mb-2 text-sm">Feature Selection</h5>
+              <p className="text-xs text-muted-foreground">
+                Not all features are useful. Use techniques like Lasso or feature importance to select the most relevant
+                ones.
+              </p>
+            </div>
+            <div className="border rounded-lg p-3">
+              <h5 className="font-medium mb-2 text-sm">Assumption Checking</h5>
+              <p className="text-xs text-muted-foreground">
+                Verify linear regression assumptions like linearity, independence, and homoscedasticity for valid
+                results.
+              </p>
+            </div>
+            <div className="border rounded-lg p-3">
+              <h5 className="font-medium mb-2 text-sm">Hyperparameter Tuning</h5>
+              <p className="text-xs text-muted-foreground">
+                Use cross-validation to find the optimal regularization strength and other parameters for your model.
+              </p>
+            </div>
+          </div>
         </Card>
+
+        <div className="flex justify-center mt-8">
+          <Button size="lg" className="gap-2">
+            <ArrowRight className="h-4 w-4" />
+            Continue to Practice Exercises
+          </Button>
+        </div>
       </div>
     )
   }
 
-  // Section 5: Conclusion
-  if (section === 5) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 p-6 rounded-lg border border-blue-100 dark:border-blue-900">
-          <h3 className="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-3">Conclusion and Next Steps</h3>
-          <p className="text-blue-700 dark:text-blue-300 leading-relaxed">
-            Linear regression is a powerful and interpretable algorithm that serves as a foundation for many more
-            complex machine learning techniques. By mastering linear regression, you've taken an important step in your
-            data science journey.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-5">
-            <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
-              <Sigma className="h-5 w-5 text-primary" />
-              Summary of Key Concepts
-            </h4>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                <span>Linear regression models the relationship between variables using a linear equation</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                <span>
-                  Simple linear regression uses one independent variable, while multiple linear regression uses several
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                <span>Model evaluation metrics like R², MSE, and RMSE help assess model performance</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                <span>Regularization techniques like Ridge, Lasso, and Elastic Net help prevent overfitting</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                <span>Always split your data into training and testing sets to properly evaluate models</span>
-              </li>
-            </ul>
-          </Card>
-
-          <Card className="p-5">
-            <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
-              <ArrowRight className="h-5 w-5 text-primary" />
-              Where to Go Next
-            </h4>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <Badge className="mt-1" variant="outline">
-                  1
-                </Badge>
-                <span>
-                  <strong>Polynomial Regression:</strong> Extend linear regression to model non-linear relationships
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Badge className="mt-1" variant="outline">
-                  2
-                </Badge>
-                <span>
-                  <strong>Logistic Regression:</strong> Apply regression concepts to classification problems
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Badge className="mt-1" variant="outline">
-                  3
-                </Badge>
-                <span>
-                  <strong>Feature Engineering:</strong> Learn to create and transform features to improve model
-                  performance
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Badge className="mt-1" variant="outline">
-                  4
-                </Badge>
-                <span>
-                  <strong>Cross-Validation:</strong> Master more robust model evaluation techniques
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Badge className="mt-1" variant="outline">
-                  5
-                </Badge>
-                <span>
-                  <strong>Advanced Models:</strong> Explore tree-based models, neural networks, and ensemble methods
-                </span>
-              </li>
-            </ul>
-          </Card>
-        </div>
-
-        <Card className="p-5 bg-muted/30">
-          <h4 className="font-medium text-lg mb-3">Practical Tips for Real-World Applications</h4>
-        </Card>
-      </div>
-    )
-  }
-
+  // Default return if section is not found
   return (
-    <div>
-      <h1>No content available for this section.</h1>
+    <div className="py-8 text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+        <BookOpen className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-xl font-medium mb-2">Section Content Coming Soon</h3>
+      <p className="text-muted-foreground max-w-md mx-auto">
+        We're currently developing content for this section of the Linear Regression tutorial. Check back soon!
+      </p>
     </div>
   )
 }
