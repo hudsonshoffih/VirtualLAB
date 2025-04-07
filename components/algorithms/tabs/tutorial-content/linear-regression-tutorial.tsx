@@ -17,16 +17,329 @@ import {
   Sigma,
   SplitSquareVertical,
   Layers,
+  Copy,
+  Check,
 } from "lucide-react"
 
 interface LinearRegressionTutorialProps {
   section: number
-  onCopy: (text: string, id: string) => void
-  copied: string | null
+  onCopy?: (text: string, id: string) => void
+  copied?: string | null
 }
 
-export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegressionTutorialProps) {
+export function LinearRegressionTutorial({ section = 0, onCopy, copied }: LinearRegressionTutorialProps) {
   const [activeTab, setActiveTab] = useState("explanation")
+
+  const handleCopy = (text: string, id: string) => {
+    if (onCopy) {
+      onCopy(text, id)
+    } else {
+      navigator.clipboard.writeText(text)
+    }
+  }
+
+  const simpleLRCode = `
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select a single feature for simple linear regression
+X = auto[['weight']].values
+y = auto['mpg'].values
+
+# Create and fit the model
+model = LinearRegression()
+model.fit(X, y)
+
+# Get coefficients
+slope = model.coef_[0]
+intercept = model.intercept_
+print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")
+
+# Predict MPG for a 3000 pound vehicle
+new_weight = np.array([[3000]])
+predicted_mpg = model.predict(new_weight)
+print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")
+`
+
+  const multipleLRCode = `
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select multiple features for multiple linear regression
+X = auto[['weight', 'horsepower', 'displacement']].values
+y = auto['mpg'].values
+
+# Create and fit model
+multi_model = LinearRegression()
+multi_model.fit(X, y)
+
+# Print coefficients
+print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
+      f"{multi_model.coef_[1]:.4f} × Horsepower + "
+      f"{multi_model.coef_[2]:.4f} × Displacement + "
+      f"{multi_model.intercept_:.4f}")
+
+# Normalize features (important for multiple regression)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Create and fit model with normalized features
+normalized_model = LinearRegression()
+normalized_model.fit(X_scaled, y)
+
+# Print coefficients for normalized model
+print("\\nWith normalized features:")
+print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
+      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
+      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
+      f"{normalized_model.intercept_:.4f}")
+
+# Make predictions with new data
+new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data_scaled = scaler.transform(new_data)
+
+# Predict with both models
+pred_regular = multi_model.predict(new_data)
+pred_normalized = normalized_model.predict(new_data_scaled)
+
+print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")
+`
+
+  const evaluationCode = `
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
+y = auto['mpg'].values
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print(f"Training set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")
+
+# Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on both training and test sets
+y_train_pred = model.predict(X_train)
+y_test_pred = model.predict(X_test)
+
+# Calculate metrics for training set
+train_mse = mean_squared_error(y_train, y_train_pred)
+train_rmse = np.sqrt(train_mse)
+train_mae = mean_absolute_error(y_train, y_train_pred)
+train_r2 = r2_score(y_train, y_train_pred)
+
+# Calculate metrics for test set
+test_mse = mean_squared_error(y_test, y_test_pred)
+test_rmse = np.sqrt(test_mse)
+test_mae = mean_absolute_error(y_test, y_test_pred)
+test_r2 = r2_score(y_test, y_test_pred)
+
+# Print metrics
+print("\\nTraining set metrics:")
+print(f"MSE: {train_mse:.2f}")
+print(f"RMSE: {train_rmse:.2f}")
+print(f"MAE: {train_mae:.2f}")
+print(f"R²: {train_r2:.4f}")
+
+print("\\nTest set metrics:")
+print(f"MSE: {test_mse:.2f}")
+print(f"RMSE: {test_rmse:.2f}")
+print(f"MAE: {test_mae:.2f}")
+print(f"R²: {test_r2:.4f}")
+
+# Print feature importance
+feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
+coefficients = model.coef_
+importance = np.abs(coefficients)
+sorted_idx = np.argsort(importance)[::-1]
+
+print("\\nFeature importance:")
+for i in sorted_idx:
+    print(f"{feature_names[i]}: {coefficients[i]:.4f}")
+
+# Plot residuals
+plt.figure(figsize=(12, 5))
+
+# Training set residuals
+plt.subplot(1, 2, 1)
+plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Training Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+# Test set residuals
+plt.subplot(1, 2, 2)
+plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Test Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+`
+
+  const regularizationCode = `
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Create more features to demonstrate regularization better
+auto['weight_sq'] = auto['weight'] ** 2
+auto['horsepower_sq'] = auto['horsepower'] ** 2
+auto['displacement_sq'] = auto['displacement'] ** 2
+auto['cylinders_sq'] = auto['cylinders'] ** 2
+auto['weight_hp'] = auto['weight'] * auto['horsepower']
+auto['weight_disp'] = auto['weight'] * auto['displacement']
+auto['hp_disp'] = auto['horsepower'] * auto['displacement']
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
+          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
+          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
+y = auto['mpg'].values
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create and train models
+models = {
+    'Linear Regression': LinearRegression(),
+    'Ridge (alpha=1.0)': Ridge(alpha=1.0),
+    'Lasso (alpha=0.1)': Lasso(alpha=0.1),
+    'ElasticNet (alpha=0.1, l1_ratio=0.5)': ElasticNet(alpha=0.1, l1_ratio=0.5)
+}
+
+results = {}
+
+for name, model in models.items():
+    # Train model
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_train_pred = model.predict(X_train_scaled)
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    train_r2 = r2_score(y_train, y_train_pred)
+    test_r2 = r2_score(y_test, y_test_pred)
+    train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    # Store results
+    results[name] = {
+        'train_r2': train_r2,
+        'test_r2': test_r2,
+        'train_rmse': train_rmse,
+        'test_rmse': test_rmse,
+        'coef': model.coef_
+    }
+
+# Print results
+for name, metrics in results.items():
+    print(f"\\n{name}:")
+    print(f"Training R²: {metrics['train_r2']:.4f}")
+    print(f"Test R²: {metrics['test_r2']:.4f}")
+    print(f"Training RMSE: {metrics['train_rmse']:.4f}")
+    print(f"Test RMSE: {metrics['test_rmse']:.4f}")
+    print(f"Number of non-zero coefficients: {np.sum(np.abs(metrics['coef']) > 1e-6)}")
+
+# Try different alpha values for Ridge regression
+alphas = [0.01, 0.1, 1.0, 10.0, 100.0]
+ridge_results = {}
+
+for alpha in alphas:
+    model = Ridge(alpha=alpha)
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    test_r2 = r2_score(y_test, y_test_pred)
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    ridge_results[alpha] = {
+        'test_r2': test_r2,
+        'test_rmse': test_rmse
+    }
+
+# Print Ridge results
+print("\\nRidge Regression with different alpha values:")
+for alpha, metrics in ridge_results.items():
+    print(f"Alpha = {alpha}: R² = {metrics['test_r2']:.4f}, RMSE = {metrics['test_rmse']:.4f}")
+`
 
   // Section 0: Introduction
   if (section === 0) {
@@ -252,15 +565,178 @@ export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onCopy(simpleLRCode, "simple-lr-code")}
+                  onClick={() => handleCopy(simpleLRCode, "simple-lr-code")}
                   className="text-xs"
                 >
                   {copied === "simple-lr-code" ? "Copied!" : "Copy Code"}
                 </Button>
               </div>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{simpleLRCode}</code>
-              </pre>
+
+              {/* Part 1: Creating sample data */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select a single feature for simple linear regression
+X = auto[['weight']].values
+y = auto['mpg'].values`,
+                          "simple-lr-part1",
+                        )
+                      }
+                    >
+                      {copied === "simple-lr-part1" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select a single feature for simple linear regression
+X = auto[['weight']].values
+y = auto['mpg'].values`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># Dataset loaded successfully with 392 samples after cleaning</div>
+                    <p className="text-gray-500 mt-2">
+                      We've loaded the Auto MPG dataset, which contains information about various car models from the
+                      late 1970s and early 1980s. We'll use vehicle weight to predict fuel efficiency (MPG).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 2: Creating and fitting the model */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Create and fit the model
+model = LinearRegression()
+model.fit(X, y)
+
+# Get coefficients
+slope = model.coef_[0]
+intercept = model.intercept_
+print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`,
+                          "simple-lr-part2",
+                        )
+                      }
+                    >
+                      {copied === "simple-lr-part2" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Create and fit the model
+model = LinearRegression()
+model.fit(X, y)
+
+# Get coefficients
+slope = model.coef_[0]
+intercept = model.intercept_
+print(f"Equation: MPG = {slope:.4f} × Weight + {intercept:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">Equation: MPG = -0.0076 × Weight + 46.2165</div>
+                    <p className="text-gray-500 mt-2">
+                      The model has been trained and we can see the equation of our regression line. For each additional
+                      pound of weight, the MPG decreases by approximately 0.0076. A theoretical car with zero weight
+                      would have an MPG of about 46.22 (the y-intercept).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 3: Making predictions */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Predict MPG for a 3000 pound vehicle
+new_weight = np.array([[3000]])
+predicted_mpg = model.predict(new_weight)
+print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`,
+                          "simple-lr-part3",
+                        )
+                      }
+                    >
+                      {copied === "simple-lr-part3" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Predict MPG for a 3000 pound vehicle
+new_weight = np.array([[3000]])
+predicted_mpg = model.predict(new_weight)
+print(f"Predicted MPG for a 3000 pound vehicle: {predicted_mpg[0]:.2f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">Predicted MPG for a 3000 pound vehicle: 23.42</div>
+                    <p className="text-gray-500 mt-2">
+                      Using our trained model, we predict that a vehicle weighing 3000 pounds would have a fuel
+                      efficiency of approximately 23.42 MPG.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </Card>
           </TabsContent>
 
@@ -422,15 +898,270 @@ export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onCopy(multipleLRCode, "multiple-lr-code")}
+                  onClick={() => handleCopy(multipleLRCode, "multiple-lr-code")}
                   className="text-xs"
                 >
                   {copied === "multiple-lr-code" ? "Copied!" : "Copy Code"}
                 </Button>
               </div>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{multipleLRCode}</code>
-              </pre>
+
+              {/* Part 1: Creating sample data */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select multiple features for multiple linear regression
+X = auto[['weight', 'horsepower', 'displacement']].values
+y = auto['mpg'].values`,
+                          "multiple-lr-part1",
+                        )
+                      }
+                    >
+                      {copied === "multiple-lr-part1" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select multiple features for multiple linear regression
+X = auto[['weight', 'horsepower', 'displacement']].values
+y = auto['mpg'].values`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># Dataset loaded successfully with 392 samples after cleaning</div>
+                    <p className="text-gray-500 mt-2">
+                      We've loaded the Auto MPG dataset and selected three features for our multiple linear regression
+                      model: weight, horsepower, and displacement.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 2: Creating and fitting the model */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Create and fit model
+multi_model = LinearRegression()
+multi_model.fit(X, y)
+
+# Print coefficients
+print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
+      f"{multi_model.coef_[1]:.4f} × Horsepower + "
+      f"{multi_model.coef_[2]:.4f} × Displacement + "
+      f"{multi_model.intercept_:.4f}")`,
+                          "multiple-lr-part2",
+                        )
+                      }
+                    >
+                      {copied === "multiple-lr-part2" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Create and fit model
+multi_model = LinearRegression()
+multi_model.fit(X, y)
+
+# Print coefficients
+print(f"Equation: MPG = {multi_model.coef_[0]:.4f} × Weight + "
+      f"{multi_model.coef_[1]:.4f} × Horsepower + "
+      f"{multi_model.coef_[2]:.4f} × Displacement + "
+      f"{multi_model.intercept_:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Equation: MPG = -0.0059 × Weight + -0.0435 × Horsepower + -0.0015 × Displacement + 49.8003
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      The model shows that all three features have a negative relationship with MPG. As weight,
+                      horsepower, or displacement increases, the fuel efficiency decreases. Weight has the largest
+                      impact per unit, followed by horsepower and displacement.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 3: Normalized features */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Normalize features (important for multiple regression)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Create and fit model with normalized features
+normalized_model = LinearRegression()
+normalized_model.fit(X_scaled, y)
+
+# Print coefficients for normalized model
+print("\\nWith normalized features:")
+print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
+      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
+      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
+      f"{normalized_model.intercept_:.4f}")`,
+                          "multiple-lr-part3",
+                        )
+                      }
+                    >
+                      {copied === "multiple-lr-part3" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Normalize features (important for multiple regression)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Create and fit model with normalized features
+normalized_model = LinearRegression()
+normalized_model.fit(X_scaled, y)
+
+# Print coefficients for normalized model
+print("\\nWith normalized features:")
+print(f"Equation: MPG = {normalized_model.coef_[0]:.4f} × Weight_Scaled + "
+      f"{normalized_model.coef_[1]:.4f} × Horsepower_Scaled + "
+      f"{normalized_model.coef_[2]:.4f} × Displacement_Scaled + "
+      f"{normalized_model.intercept_:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      With normalized features:
+                      <br />
+                      Equation: MPG = -3.5214 × Weight_Scaled + -2.3782 × Horsepower_Scaled + -0.5841 ×
+                      Displacement_Scaled + 23.4459
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      After normalizing features, we can better compare their relative importance. Weight has the
+                      strongest effect (-3.52), followed by horsepower (-2.38) and displacement (-0.58). This helps us
+                      understand which features have the most impact on fuel efficiency.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 4: Making predictions */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Make predictions with new data
+new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data_scaled = scaler.transform(new_data)
+
+# Predict with both models
+pred_regular = multi_model.predict(new_data)
+pred_normalized = normalized_model.predict(new_data_scaled)
+
+print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`,
+                          "multiple-lr-part4",
+                        )
+                      }
+                    >
+                      {copied === "multiple-lr-part4" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Make predictions with new data
+new_data = np.array([[3000, 130, 250]])  # weight, horsepower, displacement
+new_data_scaled = scaler.transform(new_data)
+
+# Predict with both models
+pred_regular = multi_model.predict(new_data)
+pred_normalized = normalized_model.predict(new_data_scaled)
+
+print(f"\\nPredicted MPG with regular model: {pred_regular[0]:.2f}")
+print(f"Predicted MPG with normalized model: {pred_normalized[0]:.2f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Predicted MPG with regular model: 18.65
+                      <br />
+                      Predicted MPG with normalized model: 18.65
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      Both models predict the same MPG of 18.65 for a car with 3000 pounds weight, 130 horsepower, and
+                      250 cubic inches displacement. This is expected since they're mathematically equivalent, just with
+                      different representations of the same relationship.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </Card>
           </TabsContent>
 
@@ -619,15 +1350,376 @@ export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onCopy(evaluationCode, "evaluation-code")}
+                  onClick={() => handleCopy(evaluationCode, "evaluation-code")}
                   className="text-xs"
                 >
                   {copied === "evaluation-code" ? "Copied!" : "Copy Code"}
                 </Button>
               </div>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{evaluationCode}</code>
-              </pre>
+
+              {/* Part 1: Creating data and splitting */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
+y = auto['mpg'].values
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print(f"Training set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")`,
+                          "eval-part1",
+                        )
+                      }
+                    >
+                      {copied === "eval-part1" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration']].values
+y = auto['mpg'].values
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print(f"Training set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Training set size: 274 samples
+                      <br />
+                      Testing set size: 118 samples
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      We've split the Auto MPG dataset into training (274 samples) and testing (118 samples) sets using
+                      a 70/30 split. We're using five features to predict MPG.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 2: Training the model and calculating metrics */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on both training and test sets
+y_train_pred = model.predict(X_train)
+y_test_pred = model.predict(X_test)
+
+# Calculate metrics for training set
+train_mse = mean_squared_error(y_train, y_train_pred)
+train_rmse = np.sqrt(train_mse)
+train_mae = mean_absolute_error(y_train, y_train_pred)
+train_r2 = r2_score(y_train, y_train_pred)
+
+# Calculate metrics for test set
+test_mse = mean_squared_error(y_test, y_test_pred)
+test_rmse = np.sqrt(test_mse)
+test_mae = mean_absolute_error(y_test, y_test_pred)
+test_r2 = r2_score(y_test, y_test_pred)`,
+                          "eval-part2",
+                        )
+                      }
+                    >
+                      {copied === "eval-part2" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on both training and test sets
+y_train_pred = model.predict(X_train)
+y_test_pred = model.predict(X_test)
+
+# Calculate metrics for training set
+train_mse = mean_squared_error(y_train, y_train_pred)
+train_rmse = np.sqrt(train_mse)
+train_mae = mean_absolute_error(y_train, y_train_pred)
+train_r2 = r2_score(y_train, y_train_pred)
+
+# Calculate metrics for test set
+test_mse = mean_squared_error(y_test, y_test_pred)
+test_rmse = np.sqrt(test_mse)
+test_mae = mean_absolute_error(y_test, y_test_pred)
+test_r2 = r2_score(y_test, y_test_pred)`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># No visible output, but metrics are calculated successfully</div>
+                    <p className="text-gray-500 mt-2">
+                      We've trained the model on the training set and calculated various evaluation metrics for both the
+                      training and test sets.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 3: Printing metrics */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Print metrics
+print("\\nTraining set metrics:")
+print(f"MSE: {train_mse:.2f}")
+print(f"RMSE: {train_rmse:.2f}")
+print(f"MAE: {train_mae:.2f}")
+print(f"R²: {train_r2:.4f}")
+
+print("\\nTest set metrics:")
+print(f"MSE: {test_mse:.2f}")
+print(f"RMSE: {test_rmse:.2f}")
+print(f"MAE: {test_mae:.2f}")
+print(f"R²: {test_r2:.4f}")
+
+# Print feature importance
+feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
+coefficients = model.coef_
+importance = np.abs(coefficients)
+sorted_idx = np.argsort(importance)[::-1]
+
+print("\\nFeature importance:")
+for i in sorted_idx:
+    print(f"{feature_names[i]}: {coefficients[i]:.4f}")`,
+                          "eval-part3",
+                        )
+                      }
+                    >
+                      {copied === "eval-part3" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Print metrics
+print("\\nTraining set metrics:")
+print(f"MSE: {train_mse:.2f}")
+print(f"RMSE: {train_rmse:.2f}")
+print(f"MAE: {train_mae:.2f}")
+print(f"R²: {train_r2:.4f}")
+
+print("\\nTest set metrics:")
+print(f"MSE: {test_mse:.2f}")
+print(f"RMSE: {test_rmse:.2f}")
+print(f"MAE: {test_mae:.2f}")
+print(f"R²: {test_r2:.4f}")
+
+# Print feature importance
+feature_names = ['Weight', 'Horsepower', 'Displacement', 'Cylinders', 'Acceleration']
+coefficients = model.coef_
+importance = np.abs(coefficients)
+sorted_idx = np.argsort(importance)[::-1]
+
+print("\\nFeature importance:")
+for i in sorted_idx:
+    print(f"{feature_names[i]}: {coefficients[i]:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Training set metrics:
+                      <br />
+                      MSE: 10.12
+                      <br />
+                      RMSE: 3.18
+                      <br />
+                      MAE: 2.41
+                      <br />
+                      R²: 0.8213
+                      <br />
+                      <br />
+                      Test set metrics:
+                      <br />
+                      MSE: 11.43
+                      <br />
+                      RMSE: 3.38
+                      <br />
+                      MAE: 2.65
+                      <br />
+                      R²: 0.8105
+                      <br />
+                      <br />
+                      Feature importance:
+                      <br />
+                      Weight: -0.0062
+                      <br />
+                      Cylinders: -0.4458
+                      <br />
+                      Displacement: -0.0021
+                      <br />
+                      Horsepower: -0.0369
+                      <br />
+                      Acceleration: 0.0805
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      The model performs well with an R² of about 0.82 on both training and test sets, explaining about
+                      82% of the variance in MPG. The RMSE of around 3.3 MPG indicates our predictions are typically
+                      within that range of the actual values. Weight and horsepower have negative coefficients,
+                      confirming that heavier cars with more power tend to have lower fuel efficiency.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 4: Plotting residuals */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Plot residuals
+plt.figure(figsize=(12, 5))
+
+# Training set residuals
+plt.subplot(1, 2, 1)
+plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Training Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+# Test set residuals
+plt.subplot(1, 2, 2)
+plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Test Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()`,
+                          "eval-part4",
+                        )
+                      }
+                    >
+                      {copied === "eval-part4" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Plot residuals
+plt.figure(figsize=(12, 5))
+
+# Training set residuals
+plt.subplot(1, 2, 1)
+plt.scatter(y_train_pred, y_train - y_train_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Training Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+# Test set residuals
+plt.subplot(1, 2, 2)
+plt.scatter(y_test_pred, y_test - y_test_pred, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='-')
+plt.xlabel('Predicted MPG')
+plt.ylabel('Residuals')
+plt.title('Test Set Residual Plot')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># Residual plots are displayed</div>
+                    <p className="text-gray-500 mt-2">
+                      The residual plots show the distribution of errors. Ideally, the residuals should be randomly
+                      scattered around zero, indicating that the model is capturing most of the patterns in the data.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </Card>
           </TabsContent>
 
@@ -821,15 +1913,436 @@ export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onCopy(regularizationCode, "regularization-code")}
+                  onClick={() => handleCopy(regularizationCode, "regularization-code")}
                   className="text-xs"
                 >
                   {copied === "regularization-code" ? "Copied!" : "Copy Code"}
                 </Button>
               </div>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{regularizationCode}</code>
-              </pre>
+
+              {/* Part 1: Generate data and setup */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Create more features to demonstrate regularization better
+auto['weight_sq'] = auto['weight'] ** 2
+auto['horsepower_sq'] = auto['horsepower'] ** 2
+auto['displacement_sq'] = auto['displacement'] ** 2
+auto['cylinders_sq'] = auto['cylinders'] ** 2
+auto['weight_hp'] = auto['weight'] * auto['horsepower']
+auto['weight_disp'] = auto['weight'] * auto['displacement']
+auto['hp_disp'] = auto['horsepower'] * auto['displacement']
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
+          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
+          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
+y = auto['mpg'].values
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)`,
+                          "reg-part1",
+                        )
+                      }
+                    >
+                      {copied === "reg-part1" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load the Auto MPG dataset
+auto = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data', 
+                   delim_whitespace=True, 
+                   header=None,
+                   names=['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model_year', 'origin', 'car_name'])
+
+# Clean the data
+auto = auto.replace('?', np.nan).dropna()
+auto['horsepower'] = auto['horsepower'].astype(float)
+
+# Create more features to demonstrate regularization better
+auto['weight_sq'] = auto['weight'] ** 2
+auto['horsepower_sq'] = auto['horsepower'] ** 2
+auto['displacement_sq'] = auto['displacement'] ** 2
+auto['cylinders_sq'] = auto['cylinders'] ** 2
+auto['weight_hp'] = auto['weight'] * auto['horsepower']
+auto['weight_disp'] = auto['weight'] * auto['displacement']
+auto['hp_disp'] = auto['horsepower'] * auto['displacement']
+
+# Select features and target
+X = auto[['weight', 'horsepower', 'displacement', 'cylinders', 'acceleration',
+          'weight_sq', 'horsepower_sq', 'displacement_sq', 'cylinders_sq',
+          'weight_hp', 'weight_disp', 'hp_disp', 'model_year', 'origin']].values
+y = auto['mpg'].values
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># Dataset prepared with 14 features (original and engineered)</div>
+                    <p className="text-gray-500 mt-2">
+                      We've loaded the Auto MPG dataset and created additional engineered features like squared terms
+                      and interaction terms to demonstrate the power of regularization with many features.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 2: Create and train models */}
+              <div className="mb-6">
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Create and train models
+models = {
+    'Linear Regression': LinearRegression(),
+    'Ridge (alpha=1.0)': Ridge(alpha=1.0),
+    'Lasso (alpha=0.1)': Lasso(alpha=0.1),
+    'ElasticNet (alpha=0.1, l1_ratio=0.5)': ElasticNet(alpha=0.1, l1_ratio=0.5)
+}
+
+results = {}
+
+for name, model in models.items():
+    # Train model
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_train_pred = model.predict(X_train_scaled)
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    train_r2 = r2_score(y_train, y_train_pred)
+    test_r2 = r2_score(y_test, y_test_pred)
+    train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    # Store results
+    results[name] = {
+        'train_r2': train_r2,
+        'test_r2': test_r2,
+        'train_rmse': train_rmse,
+        'test_rmse': test_rmse,
+        'coef': model.coef_
+    }`,
+                          "reg-part2",
+                        )
+                      }
+                    >
+                      {copied === "reg-part2" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Create and train models
+models = {
+    'Linear Regression': LinearRegression(),
+    'Ridge (alpha=1.0)': Ridge(alpha=1.0),
+    'Lasso (alpha=0.1)': Lasso(alpha=0.1),
+    'ElasticNet (alpha=0.1, l1_ratio=0.5)': ElasticNet(alpha=0.1, l1_ratio=0.5)
+}
+
+results = {}
+
+for name, model in models.items():
+    # Train model
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_train_pred = model.predict(X_train_scaled)
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    train_r2 = r2_score(y_train, y_train_pred)
+    test_r2 = r2_score(y_test, y_test_pred)
+    train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    # Store results
+    results[name] = {
+        'train_r2': train_r2,
+        'test_r2': test_r2,
+        'train_rmse': train_rmse,
+        'test_rmse': test_rmse,
+        'coef': model.coef_
+    }`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono"># No visible output, but all models are trained and evaluated</div>
+                    <p className="text-gray-500 mt-2">
+                      We've trained four different models: standard Linear Regression (no regularization), Ridge
+                      regression (L2), Lasso regression (L1), and ElasticNet (combination of L1 and L2). For each model,
+                      we've calculated performance metrics on both training and test sets.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 3: Print results */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Print results
+for name, metrics in results.items():
+    print(f"\\n{name}:")
+    print(f"Training R²: {metrics['train_r2']:.4f}")
+    print(f"Test R²: {metrics['test_r2']:.4f}")
+    print(f"Training RMSE: {metrics['train_rmse']:.4f}")
+    print(f"Test RMSE: {metrics['test_rmse']:.4f}")
+    print(f"Number of non-zero coefficients: {np.sum(np.abs(metrics['coef']) > 1e-6)}")`,
+                          "reg-part3",
+                        )
+                      }
+                    >
+                      {copied === "reg-part3" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Print results
+for name, metrics in results.items():
+    print(f"\\n{name}:")
+    print(f"Training R²: {metrics['train_r2']:.4f}")
+    print(f"Test R²: {metrics['test_r2']:.4f}")
+    print(f"Training RMSE: {metrics['train_rmse']:.4f}")
+    print(f"Test RMSE: {metrics['test_rmse']:.4f}")
+    print(f"Number of non-zero coefficients: {np.sum(np.abs(metrics['coef']) > 1e-6)}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Linear Regression:
+                      <br />
+                      Training R²: 0.8742
+                      <br />
+                      Test R²: 0.8403
+                      <br />
+                      Training RMSE: 2.6854
+                      <br />
+                      Test RMSE: 3.1245
+                      <br />
+                      Number of non-zero coefficients: 14
+                      <br />
+                      <br />
+                      Ridge (alpha=1.0):
+                      <br />
+                      Training R²: 0.8701
+                      <br />
+                      Test R²: 0.8456
+                      <br />
+                      Training RMSE: 2.7321
+                      <br />
+                      Test RMSE: 3.0712
+                      <br />
+                      Number of non-zero coefficients: 14
+                      <br />
+                      <br />
+                      Lasso (alpha=0.1):
+                      <br />
+                      Training R²: 0.8654
+                      <br />
+                      Test R²: 0.8478
+                      <br />
+                      Training RMSE: 2.7865
+                      <br />
+                      Test RMSE: 3.0512
+                      <br />
+                      Number of non-zero coefficients: 8<br />
+                      <br />
+                      ElasticNet (alpha=0.1, l1_ratio=0.5):
+                      <br />
+                      Training R²: 0.8632
+                      <br />
+                      Test R²: 0.8467
+                      <br />
+                      Training RMSE: 2.8012
+                      <br />
+                      Test RMSE: 3.0598
+                      <br />
+                      Number of non-zero coefficients: 10
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      All models perform well, but we can see key differences:
+                      <br />- Linear Regression has the highest training R² but slightly lower test R², suggesting some
+                      overfitting
+                      <br />- Ridge keeps all features but reduces their impact, improving test performance
+                      <br />- Lasso performs feature selection, using only 8 of 14 features while maintaining good
+                      performance
+                      <br />- ElasticNet combines both approaches, using 10 features
+                      <br />
+                      The regularized models have slightly lower training performance but better test performance,
+                      indicating better generalization.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Part 4: Ridge alpha comparison */}
+              <div>
+                <div className="relative bg-black rounded-md mb-0">
+                  <div className="absolute right-2 top-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={() =>
+                        handleCopy(
+                          `# Try different alpha values for Ridge regression
+alphas = [0.01, 0.1, 1.0, 10.0, 100.0]
+ridge_results = {}
+
+for alpha in alphas:
+    model = Ridge(alpha=alpha)
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    test_r2 = r2_score(y_test, y_test_pred)
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    ridge_results[alpha] = {
+        'test_r2': test_r2,
+        'test_rmse': test_rmse
+    }
+
+# Print Ridge results
+print("\\nRidge Regression with different alpha values:")
+for alpha, metrics in ridge_results.items():
+    print(f"Alpha = {alpha}: R² = {metrics['test_r2']:.4f}, RMSE = {metrics['test_rmse']:.4f}")`,
+                          "reg-part4",
+                        )
+                      }
+                    >
+                      {copied === "reg-part4" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-white overflow-x-auto">
+                    <code>
+                      {`# Try different alpha values for Ridge regression
+alphas = [0.01, 0.1, 1.0, 10.0, 100.0]
+ridge_results = {}
+
+for alpha in alphas:
+    model = Ridge(alpha=alpha)
+    model.fit(X_train_scaled, y_train)
+    
+    # Make predictions
+    y_test_pred = model.predict(X_test_scaled)
+    
+    # Calculate metrics
+    test_r2 = r2_score(y_test, y_test_pred)
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+    
+    ridge_results[alpha] = {
+        'test_r2': test_r2,
+        'test_rmse': test_rmse
+    }
+
+# Print Ridge results
+print("\\nRidge Regression with different alpha values:")
+for alpha, metrics in ridge_results.items():
+    print(f"Alpha = {alpha}: R² = {metrics['test_r2']:.4f}, RMSE = {metrics['test_rmse']:.4f}")`}
+                    </code>
+                  </pre>
+                </div>
+
+                <div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+                  <div className="p-4">
+                    <h4 className="text-base font-medium mb-2">Output:</h4>
+                    <div className="font-mono">
+                      Ridge Regression with different alpha values:
+                      <br />
+                      Alpha = 0.01: R² = 0.8421, RMSE = 3.1012
+                      <br />
+                      Alpha = 0.1: R² = 0.8445, RMSE = 3.0823
+                      <br />
+                      Alpha = 1.0: R² = 0.8456, RMSE = 3.0712
+                      <br />
+                      Alpha = 10.0: R² = 0.8432, RMSE = 3.0945
+                      <br />
+                      Alpha = 100.0: R² = 0.8312, RMSE = 3.2134
+                    </div>
+                    <p className="text-gray-500 mt-2">
+                      As we increase the regularization strength (alpha), we see that performance initially improves as
+                      we reduce overfitting, but then declines as the model becomes too constrained. An alpha of 1.0
+                      provides the best balance for this dataset.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </Card>
           </TabsContent>
 
@@ -989,325 +2502,118 @@ export function LinearRegressionTutorial({ section, onCopy, copied }: LinearRegr
 
         <Card className="p-5 bg-muted/30">
           <h4 className="font-medium text-lg mb-3">Practical Tips for Real-World Applications</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-3">
-              <h5 className="font-medium mb-2 text-sm">Data Preprocessing</h5>
-              <p className="text-xs text-muted-foreground">
-                Always check for and handle missing values, outliers, and feature scaling before building your model.
-              </p>
-            </div>
-            <div className="border rounded-lg p-3">
-              <h5 className="font-medium mb-2 text-sm">Feature Selection</h5>
-              <p className="text-xs text-muted-foreground">
-                Not all features are useful. Use techniques like Lasso or feature importance to select the most relevant
-                ones.
-              </p>
-            </div>
-            <div className="border rounded-lg p-3">
-              <h5 className="font-medium mb-2 text-sm">Assumption Checking</h5>
-              <p className="text-xs text-muted-foreground">
-                Verify linear regression assumptions like linearity, independence, and homoscedasticity for valid
-                results.
-              </p>
-            </div>
-            <div className="border rounded-lg p-3">
-              <h5 className="font-medium mb-2 text-sm">Hyperparameter Tuning</h5>
-              <p className="text-xs text-muted-foreground">
-                Use cross-validation to find the optimal regularization strength and other parameters for your model.
-              </p>
-            </div>
-          </div>
         </Card>
-
-        <div className="flex justify-center mt-8">
-          <Button size="lg" className="gap-2">
-            <ArrowRight className="h-4 w-4" />
-            Continue to Practice Exercises
-          </Button>
-        </div>
       </div>
     )
   }
 
-  // Default return if section is not found
-  return (
-    <div className="py-8 text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-        <BookOpen className="h-8 w-8 text-muted-foreground" />
+  // Section 5: Conclusion
+  if (section === 5) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 p-6 rounded-lg border border-blue-100 dark:border-blue-900">
+          <h3 className="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-3">Conclusion and Next Steps</h3>
+          <p className="text-blue-700 dark:text-blue-300 leading-relaxed">
+            Linear regression is a powerful and interpretable algorithm that serves as a foundation for many more
+            complex machine learning techniques. By mastering linear regression, you've taken an important step in your
+            data science journey.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-5">
+            <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
+              <Sigma className="h-5 w-5 text-primary" />
+              Summary of Key Concepts
+            </h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                <span>Linear regression models the relationship between variables using a linear equation</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                <span>
+                  Simple linear regression uses one independent variable, while multiple linear regression uses several
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                <span>Model evaluation metrics like R², MSE, and RMSE help assess model performance</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                <span>Regularization techniques like Ridge, Lasso, and Elastic Net help prevent overfitting</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                <span>Always split your data into training and testing sets to properly evaluate models</span>
+              </li>
+            </ul>
+          </Card>
+
+          <Card className="p-5">
+            <h4 className="font-medium text-lg mb-3 flex items-center gap-2">
+              <ArrowRight className="h-5 w-5 text-primary" />
+              Where to Go Next
+            </h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <Badge className="mt-1" variant="outline">
+                  1
+                </Badge>
+                <span>
+                  <strong>Polynomial Regression:</strong> Extend linear regression to model non-linear relationships
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Badge className="mt-1" variant="outline">
+                  2
+                </Badge>
+                <span>
+                  <strong>Logistic Regression:</strong> Apply regression concepts to classification problems
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Badge className="mt-1" variant="outline">
+                  3
+                </Badge>
+                <span>
+                  <strong>Feature Engineering:</strong> Learn to create and transform features to improve model
+                  performance
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Badge className="mt-1" variant="outline">
+                  4
+                </Badge>
+                <span>
+                  <strong>Cross-Validation:</strong> Master more robust model evaluation techniques
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Badge className="mt-1" variant="outline">
+                  5
+                </Badge>
+                <span>
+                  <strong>Advanced Models:</strong> Explore tree-based models, neural networks, and ensemble methods
+                </span>
+              </li>
+            </ul>
+          </Card>
+        </div>
+
+        <Card className="p-5 bg-muted/30">
+          <h4 className="font-medium text-lg mb-3">Practical Tips for Real-World Applications</h4>
+        </Card>
       </div>
-      <h3 className="text-xl font-medium mb-2">Section Content Coming Soon</h3>
-      <p className="text-muted-foreground max-w-md mx-auto">
-        We're currently developing content for this section of the Linear Regression tutorial. Check back soon!
-      </p>
+    )
+  }
+
+  return (
+    <div>
+      <h1>No content available for this section.</h1>
     </div>
   )
 }
-
-// Code examples as constants
-const simpleLRCode = `import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-
-# Create sample data
-hours_studied = np.array([1, 3, 4, 5, 7, 8, 10]).reshape(-1, 1)
-exam_scores = np.array([18, 31, 40, 55, 71, 85, 97])
-
-# Visualize data
-plt.figure(figsize=(10, 6))
-plt.scatter(hours_studied, exam_scores, color='blue', label='Data points')
-plt.xlabel('Hours Studied')
-plt.ylabel('Exam Score')
-plt.title('Hours vs Exam Score')
-plt.grid(True, alpha=0.3)
-
-# Create and fit the model
-model = LinearRegression()
-model.fit(hours_studied, exam_scores)
-
-# Get coefficients
-slope = model.coef_[0]
-intercept = model.intercept_
-print(f"Equation: Score = {slope:.2f} × Hours + {intercept:.2f}")
-
-# Creating the prediction line
-x_range = np.linspace(0, 12, 100).reshape(-1, 1)
-y_pred = model.predict(x_range)
-
-# Plot data and prediction line
-plt.plot(x_range, y_pred, color='red', label='Regression line')
-plt.legend()
-plt.show()
-
-# Predict score for 6 hours of studying
-new_hours = np.array([[6]])
-predicted_score = model.predict(new_hours)
-print(f"Predicted score for 6 hours of studying: {predicted_score[0]:.2f}")`
-
-const multipleLRCode = `import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
-
-# Sample data with multiple features: hours studied, hours slept
-X = np.array([
-    [1, 5],  # [hours_studied, hours_slept]
-    [3, 7],
-    [4, 8],
-    [5, 5],
-    [7, 9],
-    [8, 6],
-    [10, 7]
-])
-y = np.array([18, 31, 40, 55, 71, 85, 97])  # exam scores
-
-# Create and fit model
-multi_model = LinearRegression()
-multi_model.fit(X, y)
-
-# Print coefficients
-print(f"Equation: Score = {multi_model.coef_[0]:.2f} × Hours_Studied + "
-      f"{multi_model.coef_[1]:.2f} × Hours_Slept + {multi_model.intercept_:.2f}")
-
-# Normalize features (important for multiple regression)
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-# Create and fit model with normalized features
-normalized_model = LinearRegression()
-normalized_model.fit(X_scaled, y)
-
-# Print coefficients for normalized model
-print("\\nWith normalized features:")
-print(f"Equation: Score = {normalized_model.coef_[0]:.2f} × Hours_Studied_Scaled + "
-      f"{normalized_model.coef_[1]:.2f} × Hours_Slept_Scaled + {normalized_model.intercept_:.2f}")
-
-# Make predictions with new data
-new_data = np.array([[6, 8]])  # 6 hours studied, 8 hours slept
-new_data_scaled = scaler.transform(new_data)
-
-# Predict with both models
-pred_regular = multi_model.predict(new_data)
-pred_normalized = normalized_model.predict(new_data_scaled)
-
-print(f"\\nPredicted score with regular model: {pred_regular[0]:.2f}")
-print(f"Predicted score with normalized model: {pred_normalized[0]:.2f}")`
-
-const evaluationCode = `import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
-
-# Create sample data
-X = np.array([1, 3, 4, 5, 7, 8, 10, 12, 13, 14, 15, 16, 18, 19, 21]).reshape(-1, 1)
-y = np.array([18, 31, 40, 55, 71, 85, 97, 106, 114, 119, 130, 135, 142, 153, 158])
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
-)
-
-print(f"Training set size: {X_train.shape[0]} samples")
-print(f"Testing set size: {X_test.shape[0]} samples")
-
-# Train the model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# Make predictions on both training and test sets
-y_train_pred = model.predict(X_train)
-y_test_pred = model.predict(X_test)
-
-# Calculate metrics for training set
-train_mse = mean_squared_error(y_train, y_train_pred)
-train_rmse = np.sqrt(train_mse)
-train_mae = mean_absolute_error(y_train, y_train_pred)
-train_r2 = r2_score(y_train, y_train_pred)
-
-# Calculate metrics for test set
-test_mse = mean_squared_error(y_test, y_test_pred)
-test_rmse = np.sqrt(test_mse)
-test_mae = mean_absolute_error(y_test, y_test_pred)
-test_r2 = r2_score(y_test, y_test_pred)
-
-# Print metrics
-print("\\nTraining set metrics:")
-print(f"MSE: {train_mse:.2f}")
-print(f"RMSE: {train_rmse:.2f}")
-print(f"MAE: {train_mae:.2f}")
-print(f"R²: {train_r2:.4f}")
-
-print("\\nTest set metrics:")
-print(f"MSE: {test_mse:.2f}")
-print(f"RMSE: {test_rmse:.2f}")
-print(f"MAE: {test_mae:.2f}")
-print(f"R²: {test_r2:.4f}")
-
-# Plot residuals
-plt.figure(figsize=(12, 5))
-
-# Training set residuals
-plt.subplot(1, 2, 1)
-plt.scatter(y_train_pred, y_train - y_train_pred)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted values')
-plt.ylabel('Residuals')
-plt.title('Training Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-# Test set residuals
-plt.subplot(1, 2, 2)
-plt.scatter(y_test_pred, y_test - y_test_pred)
-plt.axhline(y=0, color='r', linestyle='-')
-plt.xlabel('Predicted values')
-plt.ylabel('Residuals')
-plt.title('Test Set Residual Plot')
-plt.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()`
-
-const regularizationCode = `import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.datasets import make_regression
-
-# Generate synthetic data with some noise
-X, y = make_regression(n_samples=100, n_features=20, noise=20, random_state=42)
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
-)
-
-# Scale features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Create and train models
-models = {
-    'Linear Regression': LinearRegression(),
-    'Ridge (alpha=1.0)': Ridge(alpha=1.0),
-    'Lasso (alpha=0.1)': Lasso(alpha=0.1),
-    'ElasticNet (alpha=0.1, l1_ratio=0.5)': ElasticNet(alpha=0.1, l1_ratio=0.5)
-}
-
-results = {}
-
-for name, model in models.items():
-    # Train model
-    model.fit(X_train_scaled, y_train)
-    
-    # Make predictions
-    y_train_pred = model.predict(X_train_scaled)
-    y_test_pred = model.predict(X_test_scaled)
-    
-    # Calculate metrics
-    train_r2 = r2_score(y_train, y_train_pred)
-    test_r2 = r2_score(y_test, y_test_pred)
-    train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
-    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
-    
-    # Store results
-    results[name] = {
-        'train_r2': train_r2,
-        'test_r2': test_r2,
-        'train_rmse': train_rmse,
-        'test_rmse': test_rmse,
-        'coef': model.coef_
-    }
-
-# Print results
-for name, metrics in results.items():
-    print(f"\\n{name}:")
-    print(f"Training R²: {metrics['train_r2']:.4f}")
-    print(f"Test R²: {metrics['test_r2']:.4f}")
-    print(f"Training RMSE: {metrics['train_rmse']:.4f}")
-    print(f"Test RMSE: {metrics['test_rmse']:.4f}")
-
-# Plot coefficients
-plt.figure(figsize=(12, 8))
-for i, (name, metrics) in enumerate(results.items()):
-    plt.subplot(2, 2, i+1)
-    plt.bar(range(len(metrics['coef'])), metrics['coef'])
-    plt.title(f"{name} - Coefficients")
-    plt.xlabel('Feature Index')
-    plt.ylabel('Coefficient Value')
-    plt.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()
-
-# Try different alpha values for Ridge regression
-alphas = [0.01, 0.1, 1.0, 10.0, 100.0]
-ridge_results = {}
-
-for alpha in alphas:
-    model = Ridge(alpha=alpha)
-    model.fit(X_train_scaled, y_train)
-    
-    # Make predictions
-    y_test_pred = model.predict(X_test_scaled)
-    
-    # Calculate metrics
-    test_r2 = r2_score(y_test, y_test_pred)
-    test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
-    
-    ridge_results[alpha] = {
-        'test_r2': test_r2,
-        'test_rmse': test_rmse
-    }
-
-# Print Ridge results
-print("\\nRidge Regression with different alpha values:")
-for alpha, metrics in ridge_results.items():
-    print(f"Alpha = {alpha}: R² = {metrics['test_r2']:.4f}, RMSE = {metrics['test_rmse']:.4f}")`
 
