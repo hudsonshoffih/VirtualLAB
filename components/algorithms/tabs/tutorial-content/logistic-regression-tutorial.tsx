@@ -716,12 +716,22 @@ s6    0.37  0.15  0.28  0.34  0.42  0.41  0.26  0.28  0.37  1.00`}
                   />
                 </div>
                 <pre className="text-sm overflow-x-auto">
-Logistic Regression Summary:
-                 Coef.  Std.Err.      z    P&gt;|z|     [0.025     0.975]
-const          -0.0000    0.0894  -0.000   1.0000    -0.1752     0.1752
-bmi             0.7329    0.0935   7.839   0.0000     0.5496     0.9162
-bp              0.3265    0.0918   3.557   0.0004     0.1466     0.5064
-s5              0.6539    0.0932   7.014   0.0000     0.4712     0.836632   7.014   0.0000     0.4712     0.8366
+                {`Logistic Regression Summary:
+==============================================================================
+Variable    Coef.     Std.Err.    z-score    P>|z|     [0.025     0.975]
+------------------------------------------------------------------------------
+const       -0.0000    0.0894      -0.000     1.0000   -0.1752     0.1752
+bmi          0.7329    0.0935       7.839     0.0000    0.5496     0.9162
+bp           0.3265    0.0918       3.557     0.0004    0.1466     0.5064
+s5           0.6539    0.0932       7.014     0.0000    0.4712     0.8366
+==============================================================================
+Note:
+- Coef.     → Estimated coefficient for the feature
+- Std.Err.  → Standard error of the coefficient
+- z-score   → Coefficient divided by standard error
+- P>|z|     → p-value (lower = more statistically significant)
+- [0.025, 0.975] → 95% confidence interval for the coefficient`}
+
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The heatmap visualizes the correlation matrix, with darker red/blue indicating stronger positive/negative correlations. 
