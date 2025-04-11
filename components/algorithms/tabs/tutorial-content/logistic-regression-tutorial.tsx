@@ -343,14 +343,14 @@ plt.show()`
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm">
-sigmoid(-5) = 0.006693
+{`sigmoid(-5) = 0.006693
 sigmoid(-2) = 0.119203
 sigmoid(-1) = 0.268941
 sigmoid(0) = 0.500000
 sigmoid(1) = 0.731059
 sigmoid(2) = 0.880797
-sigmoid(5) = 0.993307
-                </pre>
+sigmoid(5) = 0.993307`}
+</pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The sigmoid function maps any real number to a value between 0 and 1. Notice how values far below 0 approach 0, 
                   and values far above 0 approach 1. At exactly z=0, the sigmoid function outputs 0.5, which is the decision boundary.
@@ -663,7 +663,7 @@ print(result.summary2().tables[1])`
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm overflow-x-auto">
-First 5 rows of the diabetes dataset:
+{`First 5 rows of the diabetes dataset:
        age       sex       bmi        bp        s1        s2        s3        s4        s5        s6  target
 0  0.038076  0.050680  0.061696  0.021872 -0.044223 -0.034821 -0.043401 -0.002592  0.019908 -0.017646       0
 1 -0.001882 -0.044642 -0.051474 -0.026328 -0.008449 -0.019163  0.074412 -0.039493 -0.068330 -0.092204       0
@@ -682,8 +682,9 @@ s2    0.22  0.14  0.17  0.16  0.90  1.00  0.80  0.67  0.67  0.41
 s3    0.19 -0.11  0.15  0.07  0.89  0.80  1.00  0.67  0.64  0.26
 s4    0.16  0.04  0.11  0.09  0.73  0.67  0.67  1.00  0.54  0.28
 s5    0.21  0.04  0.20  0.16  0.71  0.67  0.64  0.54  1.00  0.37
-s6    0.37  0.15  0.28  0.34  0.42  0.41  0.26  0.28  0.37  1.00
-                </pre>
+s6    0.37  0.15  0.28  0.34  0.42  0.41  0.26  0.28  0.37  1.00`}
+</pre>
+
                 <p className="text-sm text-muted-foreground mt-2">
                   The diabetes dataset has been loaded and converted to a binary classification problem (1 if diabetes progression is above median, 0 otherwise). 
                   The correlation matrix shows high correlation between some features (s1, s2, s3), which could indicate multicollinearity issues.
