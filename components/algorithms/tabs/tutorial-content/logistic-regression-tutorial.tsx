@@ -1061,7 +1061,7 @@ plt.show()`
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm overflow-x-auto">
-Diabetes Dataset Information:
+{`Diabetes Dataset Information:
 Number of samples: 442
 Number of features: 10
 Feature names: ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -1075,7 +1075,7 @@ First 5 rows of the dataset:
 1 -0.001882 -0.044642 -0.051474 -0.026328 -0.008449 -0.019163  0.074412 -0.039493 -0.068330 -0.092204       0
 2  0.085299  0.050680  0.044451 -0.005671 -0.045599 -0.034194 -0.032356 -0.002592  0.002864 -0.025930       1
 3 -0.089063 -0.044642 -0.011595 -0.036656  0.012191  0.024991 -0.036038  0.034309  0.022692 -0.009362       0
-4  0.005383 -0.044642 -0.036385  0.021872  0.003935  0.015596  0.008142 -0.002592 -0.031991 -0.046641       1
+4  0.005383 -0.044642 -0.036385  0.021872  0.003935  0.015596  0.008142 -0.002592 -0.031991 -0.046641       1`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   We've loaded the diabetes dataset and converted it to a binary classification problem. The target variable is 1 if the diabetes 
@@ -1112,7 +1112,7 @@ First 5 rows of the dataset:
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm overflow-x-auto">
-Model Coefficients:
+{`Model Coefficients:
 age: 0.0387
 sex: -0.2264
 bmi: 0.3256
@@ -1130,7 +1130,7 @@ Sample 1: True=0, Predicted=0, Probability=0.2456
 Sample 2: True=0, Predicted=0, Probability=0.1234
 Sample 3: True=1, Predicted=1, Probability=0.8765
 Sample 4: True=1, Predicted=1, Probability=0.7654
-Sample 5: True=0, Predicted=0, Probability=0.3456
+Sample 5: True=0, Predicted=0, Probability=0.3456`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   We've trained a logistic regression model on the scaled data. The coefficients show the importance of each feature in predicting 
@@ -1168,7 +1168,7 @@ Sample 5: True=0, Predicted=0, Probability=0.3456
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm overflow-x-auto">
-Model Performance Metrics:
+{`Model Performance Metrics:
 Accuracy: 0.7744
 Precision: 0.7692
 Recall: 0.7879
@@ -1177,7 +1177,7 @@ AUC: 0.8523
 
 Confusion Matrix:
 [[51 15]
- [14 53]]
+[14 53]]
 
 Classification Report:
               precision    recall  f1-score   support
@@ -1187,7 +1187,7 @@ Classification Report:
 
     accuracy                           0.78       133
    macro avg       0.78      0.78      0.78       133
-weighted avg       0.78      0.78      0.78       133
+weighted avg       0.78      0.78      0.78       133`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The model achieves about 77% accuracy on the test set, with similar precision and recall values. The AUC of 0.85 indicates good 
