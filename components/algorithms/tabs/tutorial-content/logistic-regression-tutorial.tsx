@@ -1617,9 +1617,9 @@ for threshold, p, r, f1 in top_f1:
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2 mb-4 border-t-4 border-green-500">
                 <p className="text-sm font-medium mb-2">Output:</p>
                 <pre className="text-sm overflow-x-auto">
-Confusion Matrix:
+{`Confusion Matrix:
 [[51 15]
- [14 53]]
+[14 53]]`}
                 </pre>
                 <div className="flex justify-center my-4">
                   <img 
@@ -1629,7 +1629,7 @@ Confusion Matrix:
                   />
                 </div>
                 <pre className="text-sm overflow-x-auto">
-True Negatives: 51
+{`True Negatives: 51
 False Positives: 15
 False Negatives: 14
 True Positives: 53
@@ -1638,7 +1638,7 @@ Accuracy: 0.7820
 Precision: 0.7794
 Recall (Sensitivity): 0.7910
 Specificity: 0.7727
-F1 Score: 0.7852
+F1 Score: 0.7852`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The confusion matrix shows the model correctly predicted 51 true negatives and 53 true positives, while making 15 false positive 
@@ -1683,7 +1683,7 @@ F1 Score: 0.7852
                   />
                 </div>
                 <pre className="text-sm overflow-x-auto">
-AUC Score: 0.8523
+{`AUC Score: 0.8523
 
 Threshold Analysis:
 Threshold | Precision | Recall | F1 Score
@@ -1692,7 +1692,7 @@ Threshold | Precision | Recall | F1 Score
 0.4       | 0.7143    | 0.8657 | 0.7826
 0.5       | 0.7794    | 0.7910 | 0.7852
 0.6       | 0.8305    | 0.7313 | 0.7778
-0.7       | 0.8704    | 0.7015 | 0.7767
+0.7       | 0.8704    | 0.7015 | 0.7767`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The ROC curve plots the True Positive Rate against the False Positive Rate at different thresholds. The AUC of 0.85 indicates good 
@@ -1737,7 +1737,7 @@ Threshold | Precision | Recall | F1 Score
                   />
                 </div>
                 <pre className="text-sm overflow-x-auto">
-Average Precision Score: 0.8376
+{`Average Precision Score: 0.8376
 
 F1 Score at Different Thresholds:
 Threshold | Precision | Recall | F1 Score
@@ -1746,7 +1746,7 @@ Threshold | Precision | Recall | F1 Score
 0.4812   | 0.7797    | 0.7910 | 0.7853
 0.4923   | 0.7797    | 0.7910 | 0.7853
 0.5000   | 0.7794    | 0.7910 | 0.7852
-0.5077   | 0.7833    | 0.7761 | 0.7797
+0.5077   | 0.7833    | 0.7761 | 0.7797`}
                 </pre>
                 <p className="text-sm text-muted-foreground mt-2">
                   The Precision-Recall curve shows the tradeoff between precision and recall at different thresholds. The Average Precision Score of 
