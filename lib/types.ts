@@ -13,3 +13,13 @@ export interface QuizQuestion {
   explanation?: string
 }
 
+export interface TitanicPassenger {
+  survived: number
+  pclass: number
+  sex: string
+  age: number | null
+  sibsp: number
+  parch: number
+  fare: number
+  embarked: string
+}
