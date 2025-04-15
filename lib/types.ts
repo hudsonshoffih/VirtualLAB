@@ -12,3 +12,4 @@ export interface QuizQuestion {
   correctAnswer: string
   explanation?: string
 }
+

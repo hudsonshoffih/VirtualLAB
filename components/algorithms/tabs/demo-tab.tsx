@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react"
 import { Play, Pause, RefreshCw } from "lucide-react"
 import { EnhancedEdaDemo } from "./enhanced-eda-demo"
-
 interface DemoTabProps {
   algorithm: Algorithm
 }

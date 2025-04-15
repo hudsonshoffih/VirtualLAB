@@ -3,6 +3,8 @@ import { AlgorithmTabs } from "@/components/algorithms/algorithm-tabs"
 import { getAlgorithmBySlug } from "@/lib/algorithms"
 import { notFound } from "next/navigation"
 
+
+
 export default function AlgorithmPage({ params }: { params: { slug: string } }) {
   const algorithm = getAlgorithmBySlug(params.slug)
 
