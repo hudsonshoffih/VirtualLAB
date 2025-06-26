@@ -9,7 +9,6 @@ import * as logisticRegressionQuiz from "./logistic-regression-quiz";
 import * as knnQuiz from "./knn-quiz";
 import * as randomForestQuiz from "./random-forest-quiz";
 
-
 interface QuizModule {
   beginner?: QuizQuestion[];
   intermediate?: QuizQuestion[];
