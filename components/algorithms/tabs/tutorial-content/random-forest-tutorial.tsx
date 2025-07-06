@@ -512,30 +512,113 @@ interface randomForestTutorialProps {
               </Card>
             </TabsContent>
 
-            <TabsContent value="code" className="mt-4">
-              <Card className="p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium text-lg">Simple Decision Tree Implementation</h4>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(decisionTreeCode, "decision-tree-code")}
-                    className="text-xs"
-                  >
-                    {copiedState === "decision-tree-code" ? "Copied!" : "Copy Code"}
-                  </Button>
-                </div>
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{decisionTreeCode}</code>
-                </pre>
-                <div className="mt-3 text-sm text-muted-foreground">
-                  <p>
-                    This simplified implementation demonstrates the core concepts of a decision tree. It includes
-                    functions to calculate Gini impurity, find the best split, and recursively build the tree structure.
-                  </p>
-                </div>
-              </Card>
-            </TabsContent>
+    <TabsContent value="code" className="mt-4">
+      <Card className="p-5 space-y-6">
+        <div className="text-xl font-semibold mb-2">
+          Simple Decision Tree Implementation
+        </div>
+
+        {/* Code Block 1 */}
+        <div className="relative bg-black text-white rounded-md group">
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock1, "code1")}
+            >
+              {copiedState === "code1" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock1}</code>
+          </pre>
+        </div>
+
+        {/* Code Block 2 */}
+        <div className="relative bg-black text-white rounded-md group">
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock2, "code2")}
+            >
+              {copiedState === "code2" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock2}</code>
+          </pre>
+        </div>
+        {decisionTreeOutput()}
+        <div className="relative bg-black text-white rounded-md group">
+          <p className="text-sm p-4 text-green-600">Here, you need to divide given columns into two types of variables dependent(or target variable) and independent variable(or feature variables).</p>
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock3, "code3")}
+            >
+              {copiedState === "code3" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock3}</code>
+          </pre>
+        </div>
+        <div className="relative bg-black text-white rounded-md group">
+          <p className="text-sm p-4 text-green-600">To understand model performance, dividing the dataset into a training set and a test set is a good strategy.You need to pass three parameters features; target, and test_set size.</p>
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock4, "code4")}
+            >
+              {copiedState === "code4" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock4}</code>
+          </pre>
+        </div>
+        <div className="relative bg-black text-white rounded-md group">
+          <p className="text-sm p-4 text-green-600">Let's create a decision tree model and train it on the training set.</p>
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock5, "code5")}
+            >
+              {copiedState === "code5" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock5}</code>
+          </pre>
+        </div>
+        <div className="relative bg-black text-white rounded-md group">
+          <p className="text-sm p-4 text-green-600">Let's create a decision tree model and train it on the training set.</p>
+          <div className="absolute right-2 top-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-400 hover:text-white"
+              onClick={() => copyToClipboard(codeBlock6, "code6")}
+            >
+              {copiedState === "code6" ? "✅" : "📋"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto text-sm p-4 whitespace-pre-wrap">
+            <code>{codeBlock6}</code>
+          </pre>
+        </div>
+        {decisionTreeOutput1()}
+      </Card>
+    </TabsContent>
 
             <TabsContent value="visualization" className="mt-4">
               <Card className="p-5">
@@ -2276,164 +2359,143 @@ interface randomForestTutorialProps {
     )
   }
 
-// Code examples as constants
-const decisionTreeCode = `import numpy as np
-from collections import Counter
 
-class DecisionTree:
-    def __init__(self, max_depth=5, min_samples_split=2):
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.tree = None
+ const codeBlock1 = `# Load libraries
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifier
+from sklearn.model_selection import train_test_split  # Import train_test_split function
+from sklearn import metrics  # Import scikit-learn metrics module for accuracy calculation`;
 
-    def fit(self, X, y):
-        """Build the decision tree"""
-        self.tree = self._grow_tree(X, y, depth=0)
-        return self
+  const codeBlock2 = `col_names = ['pregnant', 'glucose', 'bp', 'skin', 'insulin', 'bmi', 'pedigree', 'age', 'label']
+# load dataset
+df = pd.read_csv("diabetes.csv", header=None, names=col_names)
+df.head()`;
 
-    def predict(self, X):
-        """Predict class for X"""
-        return np.array([self._predict_sample(sample, self.tree) for sample in X])
+const codeBlock3= `#Feature Selection
+feature_cols = ['pregnant', 'insulin', 'bmi', 'age','glucose', 'bp', 'pedigree']
+X = df[feature_cols]  # Features
+y = df.label  # Target variable`;
 
-    def _grow_tree(self, X, y, depth):
-        """Recursively build the decision tree"""
-        n_samples, n_features = X.shape
-        n_classes = len(np.unique(y))
+const codeBlock4 = `# Split dataset into training set and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1) # 70% training and 30% test`;
 
-        # Stopping criteria
-        if (depth >= self.max_depth or 
-            n_samples < self.min_samples_split or 
-            n_classes == 1):
-            # Return the most common class
-            leaf_value = Counter(y).most_common(1)[0][0]
-            return leaf_value
+const codeBlock5 = `# Building Decision Tree Model
 
-        # Find the best split
-        best_split = self._best_split(X, y)
-        
-        # If no split improves the impurity, make a leaf
-        if best_split is None:
-            leaf_value = Counter(y).most_common(1)[0][0]
-            return leaf_value
+# Create Decision Tree classifer object
+clf = DecisionTreeClassifier()
 
-        # Split the data
-        feature_idx = best_split["feature_idx"]
-        threshold = best_split["threshold"]
-        
-        # Create child subtrees
-        left_idxs = X[:, feature_idx] <= threshold
-        right_idxs = ~left_idxs
-        
-        left_subtree = self._grow_tree(X[left_idxs], y[left_idxs], depth + 1)
-        right_subtree = self._grow_tree(X[right_idxs], y[right_idxs], depth + 1)
-        
-        return {
-            "feature_idx": feature_idx,
-            "threshold": threshold,
-            "left": left_subtree,
-            "right": right_subtree
-        }
+# Train Decision Tree Classifer
+clf = clf.fit(X_train,y_train)
 
-    def _best_split(self, X, y):
-        """Find the best split"""
-        n_samples, n_features = X.shape
-        
-        # If not enough samples, don't split
-        if n_samples < self.min_samples_split:
-            return None
-        
-        # Calculate parent impurity
-        parent_impurity = self._gini(y)
-        
-        best_gain = 0
-        best_split = None
-        
-        # Try all features
-        for feature_idx in range(n_features):
-            # Get unique values for the feature
-            thresholds = np.unique(X[:, feature_idx])
-            
-            # Try all possible thresholds
-            for threshold in thresholds:
-                # Split the data
-                left_idxs = X[:, feature_idx] <= threshold
-                right_idxs = ~left_idxs
-                
-                # Skip if one side is empty
-                if np.sum(left_idxs) == 0 or np.sum(right_idxs) == 0:
-                    continue
-                
-                # Calculate impurity for children
-                left_impurity = self._gini(y[left_idxs])
-                right_impurity = self._gini(y[right_idxs])
-                
-                # Calculate the weighted average impurity
-                n_left, n_right = np.sum(left_idxs), np.sum(right_idxs)
-                weighted_impurity = (n_left * left_impurity + n_right * right_impurity) / n_samples
-                
-                # Calculate information gain
-                info_gain = parent_impurity - weighted_impurity
-                
-                # Update best split if this is better
-                if info_gain > best_gain:
-                    best_gain = info_gain
-                    best_split = {"feature_idx": feature_idx, "threshold": threshold}
-        
-        return best_split
+#Predict the response for test dataset
+y_pred = clf.predict(X_test)`;
 
-    def _gini(self, y):
-        """Calculate Gini impurity"""
-        # Count occurrences of each class
-        counts = np.bincount(y)
-        # Remove zeros
-        counts = counts[counts > 0]
-        # Calculate probabilities
-        probabilities = counts / len(y)
-        # Calculate Gini impurity
-        gini = 1 - np.sum(probabilities ** 2)
-        return gini
+const codeBlock6 = `# Model Accuracy, how often is the classifier correct?
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))`;
 
-    def _predict_sample(self, sample, tree):
-        """Predict class for a single sample"""
-        # If the tree is a leaf (not a dictionary), return the value
-        if not isinstance(tree, dict):
-            return tree
-        
-        # Get the feature and threshold from the tree
-        feature_idx = tree["feature_idx"]
-        threshold = tree["threshold"]
-        
-        # Decide which subtree to follow
-        if sample[feature_idx] <= threshold:
-            return self._predict_sample(sample, tree["left"])
-        else:
-            return self._predict_sample(sample, tree["right"])
+const decisionTreeOutput = () => {
+  return (
+<div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+  <div className="p-4">
+    <h4 className="text-base font-medium mb-2">Output:</h4>
+    <div className="font-mono">
+      <div className="border-b border-gray-200 mb-2">
+        <span className="text-gray-500">First 5 rows:</span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 border-b border-gray-200">pregnant</th>
+              <th className="px-4 py-2 border-b border-gray-200">glucose</th>
+              <th className="px-4 py-2 border-b border-gray-200">bp</th>
+              <th className="px-4 py-2 border-b border-gray-200">skin</th>
+              <th className="px-4 py-2 border-b border-gray-200">insulin</th>
+              <th className="px-4 py-2 border-b border-gray-200">bmi</th>
+              <th className="px-4 py-2 border-b border-gray-200">pedigree</th>
+              <th className="px-4 py-2 border-b border-gray-200">age</th>
+              <th className="px-4 py-2 border-b border-gray-200">label</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="px-4 py-2 border-b border-gray-200">6</td>
+              <td className="px-4 py-2 border-b border-gray-200">148</td>
+              <td className="px-4 py-2 border-b border-gray-200">72</td>
+              <td className="px-4 py-2 border-b border-gray-200">35</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200">33.6</td>
+              <td className="px-4 py-2 border-b border-gray-200">0.627</td>
+              <td className="px-4 py-2 border-b border-gray-200">50</td>
+              <td className="px-4 py-2 border-b border-gray-200">1</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 border-b border-gray-200">1</td>
+              <td className="px-4 py-2 border-b border-gray-200">85</td>
+              <td className="px-4 py-2 border-b border-gray-200">66</td>
+              <td className="px-4 py-2 border-b border-gray-200">29</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200">26.6</td>
+              <td className="px-4 py-2 border-b border-gray-200">0.351</td>
+              <td className="px-4 py-2 border-b border-gray-200">31</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 border-b border-gray-200">8</td>
+              <td className="px-4 py-2 border-b border-gray-200">183</td>
+              <td className="px-4 py-2 border-b border-gray-200">64</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200">23.3</td>
+              <td className="px-4 py-2 border-b border-gray-200">0.672</td>
+              <td className="px-4 py-2 border-b border-gray-200">32</td>
+              <td className="px-4 py-2 border-b border-gray-200">1</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 border-b border-gray-200">1</td>
+              <td className="px-4 py-2 border-b border-gray-200">89</td>
+              <td className="px-4 py-2 border-b border-gray-200">66</td>
+              <td className="px-4 py-2 border-b border-gray-200">23</td>
+              <td className="px-4 py-2 border-b border-gray-200">94</td>
+              <td className="px-4 py-2 border-b border-gray-200">28.1</td>
+              <td className="px-4 py-2 border-b border-gray-200">0.167</td>
+              <td className="px-4 py-2 border-b border-gray-200">21</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200">137</td>
+              <td className="px-4 py-2 border-b border-gray-200">40</td>
+              <td className="px-4 py-2 border-b border-gray-200">35</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+              <td className="px-4 py-2 border-b border-gray-200"> 43.1</td>
+              <td className="px-4 py-2 border-b border-gray-200">50</td>
+              <td className="px-4 py-2 border-b border-gray-200">1</td>
+              <td className="px-4 py-2 border-b border-gray-200">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>     
+  );
+};
 
-# Example usage
-if __name__ == "__main__":
-    # Create a simple dataset
-    X = np.array([
-        [2.5, 2.4],
-        [0.5, 0.7],
-        [2.2, 2.9],
-        [1.9, 2.2],
-        [3.1, 3.0],
-        [2.3, 2.7],
-        [2.0, 1.6],
-        [1.0, 1.1],
-        [1.5, 1.6],
-        [1.1, 0.9]
-    ])
-    y = np.array([0, 1, 0, 0, 0, 0, 1, 1, 1, 1])
-    
-    # Create and train the decision tree
-    tree = DecisionTree(max_depth=3)
-    tree.fit(X, y)
-    
-    # Make predictions
-    predictions = tree.predict(X)
-    print("Predictions:", predictions)
-    print("Accuracy:", np.sum(predictions == y) / len(y))`
+const decisionTreeOutput1 = () => {
+  return (
+<div className="border border-t-green-500 border-t-2 rounded-b-md bg-gray-50 dark:bg-gray-900">
+  <div className="p-4">
+    <h4 className="text-base font-medium mb-2">Output:</h4>
+    <div className="font-mono">
+      <div className="border-b border-gray-200 mb-2">
+        <span className="text-gray-500">Accuracy: 0.6753246753246753</span>
+      </div>
+    </div>
+  </div>
+</div>
+  );
+};
 
 const bootstrappingCode = `import numpy as np
 from collections import Counter

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PYTHON_BACKEND_URL = "http://localhost:5000/api/execute";
+const PYTHON_BACKEND_URL = "https://virtualab-backend.onrender.com/api/execute";
 
 export async function POST(request: NextRequest) {
   try {
