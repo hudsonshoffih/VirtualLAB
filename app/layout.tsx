@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Virtual Lab",
-  description: "Interactive learning platform for Machine Learning algorithms",
+  description: "Interactive learning platform for data science algorithms",
 }
 
 export default function RootLayout({
@@ -27,4 +27,3 @@ export default function RootLayout({
     </html>
   )
 }
-
