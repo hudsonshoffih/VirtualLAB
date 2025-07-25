@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Virtual Data Science Lab",
+  title: "Machine Learning Lab",
   description: "An interactive platform to learn, practice, and master data science algorithms",
 }
 

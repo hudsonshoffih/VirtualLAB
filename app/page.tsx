@@ -143,7 +143,7 @@ export default function Home() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: ["easeOut"],
       },
     },
   }
@@ -164,8 +164,8 @@ export default function Home() {
           </Button>
           <Button variant="ghost" size="sm" className="gap-2">
             <Zap className="h-4 w-4" />
-            Demo
-            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">D</span>
+            Practice
+            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">P</span>
           </Button>
           <ModeToggle />
         </div>

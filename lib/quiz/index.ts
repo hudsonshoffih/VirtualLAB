@@ -8,6 +8,7 @@ import * as evaluationMetricsQuiz from "./evaluation-metrics-quiz";
 import * as logisticRegressionQuiz from "./logistic-regression-quiz";
 import * as knnQuiz from "./knn-quiz";
 import * as randomForestQuiz from "./random-forest-quiz";
+import * as pcaQuiz from "./pca-quiz";
 
 interface QuizModule {
   beginner?: QuizQuestion[];
@@ -25,6 +26,7 @@ const quizModules: Record<string, QuizModule> = {
   "logistic-regression": logisticRegressionQuiz,
   knn: knnQuiz,
   "random-forest": randomForestQuiz,
+  pca: pcaQuiz,
 };
 
 export function getQuizQuestions(

@@ -133,7 +133,7 @@ const cardVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      // Remove 'type' or use type: "spring" as AnimationGeneratorType if you import AnimationGeneratorType
       stiffness: 100,
       damping: 15,
       duration: 0.6,
@@ -147,7 +147,6 @@ const skillVariants = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: "spring",
       stiffness: 200,
       damping: 20,
     },
