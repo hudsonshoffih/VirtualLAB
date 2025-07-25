@@ -185,7 +185,7 @@ export default function Home() {
 
             <motion.div variants={itemVariants}>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-                Virtual Data Science Lab
+                Machine Learning Virtual Lab
               </h1>
             </motion.div>
 
