@@ -11,7 +11,7 @@ import {
   Home,
   BookOpen,
   Lightbulb,
-  GraduationCap,
+  Users,
   BarChart,
   GitBranch,
   Network,
@@ -191,12 +191,16 @@ export function HoverSidebar() {
                     {[
                       { href: "/resources/tutorials", icon: BookOpen, label: "Tutorials" },
                       { href: "/resources/examples", icon: Lightbulb, label: "Examples" },
-                      { href: "/resources/courses", icon: GraduationCap, label: "Courses" },
+                      { href: "/resources/contributors", icon: Users, label: "Contributors" },
                     ].map((item, index) => (
                       <motion.div key={item.href} variants={itemVariants} transition={{ delay: index * 0.03 }}>
                         <Link
                           href={item.href}
-                          className="flex items-center gap-3 p-3 rounded-lg transition-all group hover:bg-muted"
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-all group ${
+                            pathname === item.href
+                              ? "bg-primary/10 text-primary border border-primary/20"
+                              : "hover:bg-muted"
+                          }`}
                         >
                           <motion.div
                             whileHover={{

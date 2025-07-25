@@ -188,8 +188,8 @@ export function AppSidebar() {
                   <div className="space-y-1">
                     {[
                       { href: "/resources/tutorials", icon: BookOpen, label: "Tutorials" },
-                      { href: "/resources/examples", icon: Lightbulb, label: "Examples" },
-                      { href: "/resources/courses", icon: GraduationCap, label: "Courses" },
+                      { href: "/resources/Courses", icon: Lightbulb, label: "Courses" },
+                      { href: "/resources/Contributers", icon: GraduationCap, label: "Contributers" },
                     ].map((item, index) => (
                       <motion.div key={item.href} variants={itemVariants} transition={{ delay: index * 0.03 }}>
                         <Link
