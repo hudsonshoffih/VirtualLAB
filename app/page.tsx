@@ -138,7 +138,7 @@ export default function Home() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: "easeInOut", // use a valid easing string
       },
     },
   }
@@ -149,7 +149,7 @@ export default function Home() {
       transition: {
         duration: 3,
         repeat: Number.POSITIVE_INFINITY,
-        ease: "easeInOut",
+        ease: [0.42, 0, 0.58, 1],
       },
     },
   }
