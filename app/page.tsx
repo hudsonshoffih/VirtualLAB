@@ -28,7 +28,7 @@ import { FloatingDock } from "@/components/ui/floating-dock"
 import { CommandSearch } from "@/components/search/command-search"
 import { ModeToggle } from "@/components/mode-toggle"
 import { HoverSidebar } from "@/components/hover-sidebar"
-import { ReactElement, ElementType } from "react";
+import { ElementType } from "react";
 export default function Home() {
   const allAlgorithms = getAlgorithms();
   const featuredAlgorithms = [
