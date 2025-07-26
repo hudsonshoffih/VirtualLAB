@@ -28,7 +28,7 @@ import { FloatingDock } from "@/components/ui/floating-dock"
 import { CommandSearch } from "@/components/search/command-search"
 import { ModeToggle } from "@/components/mode-toggle"
 import { HoverSidebar } from "@/components/hover-sidebar"
-import { ComponentType } from "react";
+import { ReactElement, ElementType } from "react";
 export default function Home() {
   const allAlgorithms = getAlgorithms();
   const featuredAlgorithms = [
@@ -45,7 +45,7 @@ export default function Home() {
     allAlgorithms[10],
   ];
 
-const algorithmIcons: Record<string, ComponentType<any>> = {
+const algorithmIcons: Record<string, ElementType> = {
   eda: Database,
   "dataset-insights": BarChart,
   "evaluation-metrics": PieChart,
@@ -57,7 +57,7 @@ const algorithmIcons: Record<string, ComponentType<any>> = {
   "ensemble-models": Layers,
   kmeans: CircleDot,
   pca: Boxes,
-}
+};
   const dockItems = [
     {
       title: "Exploratory Data Analysis",
