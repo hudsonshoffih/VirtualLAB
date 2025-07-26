@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Github, Linkedin, Twitter, Globe, MapPin, Calendar, Star,Instagram } from "lucide-react"
+import { Github, Linkedin, Twitter, Globe, MapPin,Star } from "lucide-react" // Calender is not needed here
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,7 +19,7 @@ const contributors = [
     social: {
       github: "hudsonshoffih",
       linkedin: "hudson-h-3b6933291",
-      Instagram: "https://www.instagram.com/hudson.h7/",
+     // Instagram: "https://www.instagram.com/hudson.h7/",
       website: "alexchen.dev",
     },
   },
@@ -275,7 +275,7 @@ export default function ContributorsPage() {
                       viewport={{ once: true }}
                     >
                       <div className="flex flex-wrap gap-2 justify-center">
-                        {contributor.skills.map((skill, index) => (
+                        {contributor.skills.map((skill) => ( // index is not needed here
                           <motion.div key={skill} variants={skillVariants}>
                             <Badge
                               variant="secondary"
@@ -335,7 +335,7 @@ export default function ContributorsPage() {
             Want to Contribute?
           </motion.h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto text-lg">
-            Join our amazing community of contributors! Whether you're a developer, designer, or educator, there's a
+            Join our amazing community of contributors! Whether you&rsquo;re a developer, designer, or educator, there&rsquo;s a
             place for you in our team.
           </p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

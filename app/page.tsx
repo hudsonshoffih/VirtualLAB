@@ -13,9 +13,9 @@ import {
   Brain,
   Target,
   Zap,
-  Clock,
-  TrendingUp,
-  Users,
+  //Clock,
+  //TrendingUp,
+ // Users,
   Boxes,
   Layers,
   PieChart,
@@ -45,7 +45,7 @@ export default function Home() {
     allAlgorithms[10],
   ];
 
-  const algorithmIcons: Record<string, any> = {
+  const algorithmIcons: Record<string,any> = {
     eda: Database,
     "dataset-insights": BarChart,
     "evaluation-metrics": PieChart,
@@ -263,7 +263,7 @@ export default function Home() {
         >
           <div className="max-w-6xl mx-auto">
             <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={containerVariants}>
-              {featuredAlgorithms.map((algorithm, index) => {
+              {featuredAlgorithms.map((algorithm) => { // index is not needed here
                 const Icon = algorithmIcons[algorithm.slug] || BarChart
 
                 return (
@@ -357,7 +357,7 @@ export default function Home() {
                         title: "Test",
                         desc: "Validate understanding with adaptive quizzes and comprehensive assessments.",
                       },
-                    ].map((item, index) => (
+                    ].map((item) => ( // index is not needed here
                       <motion.li
                         key={item.title}
                         className="flex gap-4 group"
