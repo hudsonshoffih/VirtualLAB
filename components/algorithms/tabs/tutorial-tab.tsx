@@ -19,6 +19,7 @@ import { RandomForestTutorial } from "./tutorial-content/random-forest-tutorial"
 import { SvmTutorial } from "./tutorial-content/svm-tutorial"
 import { EnsembleTutorial } from "./tutorial-content/ensemble-learning-tutorial"
 import { KMeansTutorial } from "./tutorial-content/kmeans-tutorial"
+import { PcaTutorial } from "./tutorial-content/pca"
 
 
 interface TutorialTabProps {
@@ -71,7 +72,9 @@ export function TutorialTab({ algorithm }: TutorialTabProps) {
         return <EnsembleTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
       case "kmeans":
         return <KMeansTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />
-      default:
+      case "pca":
+        return <PcaTutorial section={currentSection} onCopy={copyToClipboard} copied={copied} />  
+      default: 
         return (
           <div className="prose dark:prose-invert max-w-none">
             <div className="bg-muted/50 p-4 rounded-lg mb-6 border-l-4 border-primary">

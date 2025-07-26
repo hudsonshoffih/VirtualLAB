@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Github, Linkedin, Twitter, Globe, MapPin, Calendar, Star } from "lucide-react"
+import { Github, Linkedin, Twitter, Globe, MapPin, Calendar, Star,Instagram } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,16 +10,16 @@ const contributors = [
   {
     id: 1,
     name: "Hudson Shoffi H",
-    role: "Contributor",
+    role: "ML, Full Stack, DevOps",
     avatar: "/images/hudson.jpg?height=120&width=120",
-    bio: "Full-stack developer with 8+ years of experience in machine learning and web development. Passionate about creating educational tools.",
+    bio: "Full-stack developer and AI/ML practitioner passionate about building intelligent, scalable web applications, LLMs, and innovative digital solutions.",
     location: "Salem, Tamil Nadu",
-    skills: ["React", "Python", "TypeScript", "Machine Learning", "Node.js"],
+    skills: ["React", "Python", "FastAPI", "Machine Learning", "Node.js","Data Science"],
     gradient: "from-blue-500 to-purple-600",
     social: {
       github: "hudsonshoffih",
       linkedin: "hudson-h-3b6933291",
-      twitter: "alexchen_dev",
+      Instagram: "https://www.instagram.com/hudson.h7/",
       website: "alexchen.dev",
     },
   },
@@ -57,14 +57,14 @@ const contributors = [
   },
   {
     id: 4,
-    name: "Emma Thompson",
-    role: "Frontend Engineer",
+    name: "Dr.C.Sherin Shibi",
+    role: "Assistant Professor",
     avatar: "/placeholder.svg?height=120&width=120",
-    bio: "Frontend specialist with a passion for creating interactive and responsive user interfaces. Loves working with modern web technologies.",
-    location: "London, UK",
+    bio: "Assistant Professor with research interests in Computer Vision, Machine Learning, Deep Learning, and IoT. Passionate about building intelligent systems with FPGA implementation and real-world applications in remote sensing.",
+    location: "Chennai, India",
     joinDate: "Apr 2023",
     contributions: 134,
-    skills: ["React", "Next.js", "Tailwind CSS", "Framer Motion", "JavaScript"],
+    skills: ["Machine Learning", "Image Processing", "Deep Learning", "Remote Sensing", "IoT"],
     gradient: "from-orange-500 to-red-600",
     social: {
       github: "emma-thompson",

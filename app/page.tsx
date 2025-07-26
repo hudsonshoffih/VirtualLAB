@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { getAlgorithms } from "@/lib/algorithms"
-import { motion } from "framer-motion"
+import { motion, Easing } from "framer-motion"
 import { FloatingDock } from "@/components/ui/floating-dock"
 import { CommandSearch } from "@/components/search/command-search"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -143,7 +143,7 @@ export default function Home() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: ["easeOut"],
+        ease: "easeInOut" as Easing,
       },
     },
   }
