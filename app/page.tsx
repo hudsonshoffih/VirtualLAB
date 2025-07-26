@@ -57,7 +57,7 @@ const algorithmIcons: Record<string, ComponentType<any>> = {
   "ensemble-models": Layers,
   kmeans: CircleDot,
   pca: Boxes,
-};
+}
   const dockItems = [
     {
       title: "Exploratory Data Analysis",
