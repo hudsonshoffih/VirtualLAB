@@ -48,7 +48,6 @@ export function AppSidebar() {
       x: 0,
       opacity: 1,
       transition: {
-        type: "spring",
         stiffness: 400,
         damping: 25,
       },
